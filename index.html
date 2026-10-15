@@ -5,24 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Little Artist Club | Paint. Play. Create.</title>
   <link rel="stylesheet" href="background.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
 
   <style>
     /* EDIT: colours and fonts for the whole shop */
     :root {
-      --plaster: #eceef0;
-      --paper: #ffffff;
-      --ink: #22262b;
-      --muted: #5d656d;
-      --cobalt: #2f5bd8;
-      --marigold: #f2b705;
-      --line: #d3d7db;
-      --heading: "Trebuchet MS", "Segoe UI", sans-serif;
-      --body: "Segoe UI", Arial, sans-serif;
-    }
+  /* page and text */
+  --plaster: #FBFAF5;   /* logo cream */
+  --paper: #ffffff;
+  --ink: #1F2A4A;       /* logo navy */
+  --muted: #5A6482;
+  --line: #E4DDEF;
+
+  /* main accent, used for links, buttons and focus rings */
+  --cobalt: #7A55B8;    /* deeper version of the logo's lavender */
+
+  /* logo pastels */
+  --marigold: #FCCB52;  /* logo yellow */
+  --pink: #FF93C1;
+  --mint: #92D1B4;
+  --lavender: #C69CDE;
+  --sky: #86C4E9;
+
+  --heading: "Fredoka", "Trebuchet MS", sans-serif;
+  --body: "Segoe UI", Arial, sans-serif;
+}
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body { margin: 0; background: var(--plaster); color: var(--ink); font-family: var(--body); line-height: 1.6; }
+    body {
+  margin: 0;
+  background-color: #FBFAF5;
+  background-image: url("littleartists-pattern.svg");
+  background-size: 640px;
+  background-repeat: repeat;
+  color: var(--ink);
+  font-family: var(--body);
+  line-height: 1.6;
+}
     a { color: var(--cobalt); }
     button { font: inherit; cursor: pointer; }
     :focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; }
