@@ -31,7 +31,8 @@
     /* Top bar */
     .topbar { background: var(--ink); color: #fff; position: sticky; top: 0; z-index: 10; }
     .topbar .wrap { display: flex; align-items: center; justify-content: space-between; padding-top: .75rem; padding-bottom: .75rem; }
-    .brand { font-family: var(--heading); font-size: 1.25rem; font-weight: 700; color: #fff; text-decoration: none; }
+    .brand { font-family: var(--heading); font-size: 1.25rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: .6rem; }
+    .logo { height: 2.25rem; width: auto; display: block; }
     .cart-btn { background: var(--marigold); color: var(--ink); border: 0; border-radius: 999px; padding: .45rem 1rem; font-weight: 700; }
 
     /* Hero */
@@ -90,7 +91,7 @@
   <div class="topbar">
     <div class="wrap">
       <!-- EDIT: your shop name -->
-      <a class="brand" href="#top">Little Artist Club</a>
+      <a class="brand" href="#top"><img src="logo.jpeg" alt="Your Shop Name" class="logo"> Little Artist Club</a>
       <button class="cart-btn" id="open-cart">Cart (<span id="count">0</span>)</button>
     </div>
   </div>
