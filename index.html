@@ -1,349 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Little Artist Club | Paint. Play. Create.</title>
-  <link rel="stylesheet" href="background.css">
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
-
-  <style>
-    /* EDIT: colours and fonts for the whole shop */
-    :root {
-  /* page and text */
-  --plaster: #FBFAF5;   /* logo cream */
-  --paper: #ffffff;
-  --ink: #1F2A4A;       /* logo navy */
-  --muted: #5A6482;
-  --line: #E4DDEF;
-
-  /* main accent, used for links, buttons and focus rings */
-  --cobalt: #7A55B8;    /* deeper version of the logo's lavender */
-
-  /* logo pastels */
-  --marigold: #FCCB52;  /* logo yellow */
-  --pink: #FF93C1;
-  --mint: #92D1B4;
-  --lavender: #C69CDE;
-  --sky: #86C4E9;
-
-  --heading: "Fredoka", "Trebuchet MS", sans-serif;
-  --body: "Segoe UI", Arial, sans-serif;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Little Artist Club | Paint. Play. Create.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #E3ECE1;          /* light sage page */
+  --sage: #587A62;        /* dark sage: header + buttons */
+  --sage-hover: #46614E;
+  --blush: #F8E1E4;       /* product boxes */
+  --blush-deep: #F0C9CF;
+  --paper: #fff;
+  --ink: #2B3A2F;
+  --muted: #5F6F64;
+  --heading: "Playfair Display", Georgia, serif;
+  --body: "Montserrat", Arial, sans-serif;
 }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 1rem/1.6 var(--body); }
+a { color: var(--sage); }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--sage); outline-offset: 2px; }
+.wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+.btn, .add { display: inline-block; background: var(--sage); color: #fff; border: 0; border-radius: 999px; padding: .6rem 1.4rem; font-weight: 500; text-decoration: none; transition: background .2s; }
+.btn:hover, .add:hover { background: var(--sage-hover); }
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-  margin: 0;
-  background-color: #FBFAF5;
-  background-image: url("littleartists-pattern.svg");
-  background-size: 640px;
-  background-repeat: repeat;
-  color: var(--ink);
-  font-family: var(--body);
-  line-height: 1.6;
-}
-    a { color: var(--cobalt); }
-    button { font: inherit; cursor: pointer; }
-    :focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; }
+/* Header */
+.topbar { background: var(--sage); color: #fff; position: sticky; top: 0; z-index: 10; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: .6rem; padding-bottom: .6rem; }
+.brand { display: flex; align-items: center; gap: .8rem; color: #fff; text-decoration: none; }
+.logo { height: 3.2rem; width: auto; display: block; }
+.brand b { display: block; font: 600 1.5rem/1.1 var(--heading); }
+.brand small { display: block; font-weight: 500; font-size: .65rem; letter-spacing: .28em; text-transform: uppercase; color: var(--blush-deep); }
+.cart-btn { background: var(--blush); color: var(--ink); border: 0; border-radius: 999px; padding: .5rem 1.1rem; font-weight: 500; white-space: nowrap; transition: background .2s; }
+.cart-btn:hover { background: #fff; }
 
-    .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+/* Search + filters */
+.search { margin: 1.25rem 0 .9rem; }
+.search input { width: 100%; padding: .7rem 1.2rem; border: 2px solid var(--blush-deep); border-radius: 999px; background: var(--paper); font: 400 1rem var(--body); color: var(--ink); }
+.filters { display: flex; flex-wrap: wrap; gap: .5rem; }
+.filters button { display: flex; align-items: center; gap: .5rem; background: var(--paper); border: 2px solid var(--blush-deep); border-radius: 999px; padding: .25rem 1rem .25rem .3rem; color: var(--ink); font-weight: 500; font-size: .88rem; transition: background .2s; }
+.filters button:hover { background: var(--blush); }
+.filters button[aria-pressed="true"] { background: var(--sage); border-color: var(--sage); color: #fff; }
+.ico { width: 1.8rem; height: 1.8rem; display: grid; place-items: center; border-radius: 50%; background: var(--blush); font-size: .85rem; }
 
-    /* Top bar */
-    .topbar {
-  background: var(--paper);
-  color: var(--ink);
-  position: sticky; top: 0; z-index: 10;
-  border-bottom: 5px solid transparent;
-  border-image: linear-gradient(90deg, var(--pink), var(--marigold), var(--mint), var(--sky), var(--lavender)) 1;
-}
-.topbar .wrap { display: flex; align-items: center; justify-content: space-between; padding-top: .75rem; padding-bottom: .75rem; }
-.brand { font-family: var(--heading); font-size: 1.25rem; font-weight: 700; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: .6rem; }
-.logo { height: 2.75rem; width: auto; display: block; }
-.cart-btn { background: var(--marigold); color: var(--ink); border: 0; border-radius: 999px; padding: .45rem 1.1rem; font-weight: 700; transition: background .2s; }
-.cart-btn:hover { background: var(--pink); }
+/* Hero */
+.hero { background: var(--blush); border-radius: 24px; margin: 1.5rem 0 2rem; padding: 2.5rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; overflow: hidden; }
+.hero h1 { font: 700 clamp(2rem, 6vw, 3.4rem)/1.1 var(--heading); margin: 0 0 .5rem; }
+.hero p { margin: 0 0 1.4rem; font-weight: 500; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; color: var(--muted); }
+.hero svg { width: 9rem; flex: none; }
 
-    /* Hero */
-.hero { padding: 3.5rem 2rem 2.5rem; background: rgba(255, 255, 255, .88); }
-.hero h1 { font-family: var(--heading); font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.1; margin: 0 0 1rem; max-width: 18ch; color: var(--ink); }
-.hero p { max-width: 34rem; color: var(--muted); font-size: 1.1rem; margin: 0 0 1.5rem; }
-.btn { display: inline-block; background: var(--cobalt); color: #fff; border: 0; border-radius: 999px; padding: .75rem 1.6rem; font-weight: 700; text-decoration: none; transition: background .2s, color .2s; }
-.btn:hover { background: var(--pink); color: var(--ink); }
-
-/* Filters */
-.filters { display: flex; flex-wrap: wrap; gap: .5rem; margin: 2rem 0 1.25rem; }
-.filters button { background: var(--paper); border: 2px solid var(--lavender); border-radius: 999px; padding: .35rem 1rem; color: var(--ink); transition: background .2s; }
-.filters button:hover { background: #F3EAFB; }
-.filters button[aria-pressed="true"] { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
-
-/* Product grid */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1.25rem; padding-bottom: 3rem; }
-.card { background: var(--paper); border: 3px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; transition: transform .2s; }
-.card:hover { transform: translateY(-4px); }
-.card:nth-child(5n+1) { border-color: var(--pink); }
-.card:nth-child(5n+2) { border-color: var(--marigold); }
-.card:nth-child(5n+3) { border-color: var(--mint); }
-.card:nth-child(5n+4) { border-color: var(--sky); }
-.card:nth-child(5n+5) { border-color: var(--lavender); }
-.pic { aspect-ratio: 4 / 3; display: grid; place-items: center; font-family: var(--heading); font-size: 1.1rem; color: var(--ink); background: #EBDDF7; text-align: center; padding: 1rem; }
-.pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.info { padding: 1rem; display: flex; flex-direction: column; gap: .35rem; flex: 1; }
-.info h3 { margin: 0; font-family: var(--heading); font-size: 1.1rem; }
-.info .cat { margin: 0; font-size: .85rem; color: var(--muted); }
-.info .desc { margin: 0; font-size: .95rem; flex: 1; }
-.buy { display: flex; align-items: center; justify-content: space-between; margin-top: .75rem; }
-.price { font-weight: 700; font-size: 1.15rem; color: var(--ink); }
-.add { background: var(--marigold); color: var(--ink); border: 0; border-radius: 999px; padding: .5rem 1rem; font-weight: 700; transition: background .2s; }
-.add:hover { background: var(--pink); }
+/* Sections + cards */
+.sec-head { display: flex; align-items: center; gap: .75rem; margin: 2rem 0 1rem; }
+.sec-head .ico { width: 2.6rem; height: 2.6rem; background: var(--blush-deep); font-size: 1.1rem; }
+.sec-head h2 { margin: 0; font: 600 1.6rem/1.2 var(--heading); }
+.sec-head .sub { font-weight: 500; font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.more { margin-left: auto; background: var(--paper); border: 2px solid var(--blush-deep); border-radius: 999px; padding: .3rem 1rem; font-weight: 500; font-size: .85rem; color: var(--ink); }
+.more:hover { background: var(--blush); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 1rem; }
+.card { background: var(--blush); border: 1px solid var(--blush-deep); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(88,122,98,.12); }
+.pic { position: relative; aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 1rem; background: var(--blush-deep); font: 500 1rem var(--heading); text-align: center; }
+.pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.badge { position: absolute; top: .6rem; left: .6rem; background: var(--blush); border-radius: 999px; padding: .1rem .7rem; font: 500 .65rem var(--body); font-style: normal; letter-spacing: .15em; text-transform: uppercase; }
+.heart { position: absolute; top: .55rem; right: .55rem; z-index: 2; width: 2rem; height: 2rem; padding: 0; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); color: #D9758A; font-size: 1.15rem; line-height: 1; transition: transform .15s, background .2s; }
+.heart:hover { transform: scale(1.12); }
+.heart[aria-pressed="true"] { background: #D9758A; color: #fff; }
+.info { padding: .9rem; display: flex; flex-direction: column; gap: .3rem; flex: 1; }
+.cat { margin: 0; font-weight: 500; font-size: .62rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.info h3 { margin: 0; font: 600 1.1rem/1.25 var(--heading); }
+.desc { margin: 0; flex: 1; font-weight: 300; font-size: .88rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.buy { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .6rem; }
+.price { font-weight: 600; font-size: 1.1rem; }
+.add { padding: .45rem 1rem; font-size: .88rem; }
+.empty { color: var(--muted); }
 
 /* About + contact */
-.band { background: var(--paper); border-top: 5px solid transparent; border-image: linear-gradient(90deg, var(--pink), var(--marigold), var(--mint), var(--sky), var(--lavender)) 1; padding: 2.5rem 0; }
-.band h2 { font-family: var(--heading); margin-top: 0; }
-.band p { max-width: 38rem; }
+.band { background: var(--paper); padding: 2.5rem 0; margin-top: 3rem; }
+.band + .band { margin-top: 0; padding-top: 0; }
+.band h2 { font: 600 1.6rem var(--heading); margin: 0 0 .5rem; }
+.band p { max-width: 38rem; margin: 0; font-weight: 300; }
+footer { padding: 1.25rem 0; text-align: center; font-weight: 500; font-size: .85rem; color: #fff; background: var(--sage); }
 
-footer { padding: 1.5rem 0; font-size: .9rem; color: var(--muted); background: var(--paper); text-align: center; border-top: 1px solid var(--line); }
+/* Cart panel */
+.panel { position: fixed; top: 0; right: 0; height: 100%; width: min(24rem, 100%); background: var(--paper); border-left: 5px solid var(--sage); box-shadow: -4px 0 20px rgba(0,0,0,.2); transform: translateX(100%); transition: transform .25s; z-index: 20; display: flex; flex-direction: column; }
+.panel.open { transform: translateX(0); }
+.panel header { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 3px solid var(--blush-deep); }
+.panel h2 { margin: 0; font: 600 1.3rem var(--heading); }
+.close { background: var(--blush); border: 0; border-radius: 50%; width: 2rem; height: 2rem; font-size: 1.3rem; line-height: 1; color: var(--ink); }
+.items { flex: 1; overflow-y: auto; padding: 1rem; }
+.line { display: flex; justify-content: space-between; gap: .5rem; padding: .6rem 0; border-bottom: 2px dashed var(--blush-deep); }
+.line small { display: block; color: var(--muted); font-weight: 500; }
+.qty { display: flex; align-items: center; gap: .4rem; font-weight: 600; }
+.qty button { width: 1.8rem; height: 1.8rem; padding: 0; border: 2px solid var(--sage); background: #fff; border-radius: 50%; color: var(--ink); font-weight: 600; line-height: 1; }
+.foot { padding: 1rem; border-top: 3px solid var(--blush-deep); }
+.total { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: .75rem; }
+.foot .btn { width: 100%; text-align: center; }
 
-    /* Cart panel */
-    .panel { position: fixed; top: 0; right: 0; height: 100%; width: min(24rem, 100%); background: var(--paper); box-shadow: -4px 0 20px rgba(0,0,0,.2); transform: translateX(100%); transition: transform .25s; z-index: 20; display: flex; flex-direction: column; }
-    .panel.open { transform: translateX(0); }
-    .panel header { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--line); }
-    .panel h2 { margin: 0; font-family: var(--heading); font-size: 1.2rem; }
-    .close { background: none; border: 0; font-size: 1.5rem; line-height: 1; }
-    .items { flex: 1; overflow-y: auto; padding: 1rem; }
-    .line { display: flex; justify-content: space-between; gap: .5rem; padding: .6rem 0; border-bottom: 1px solid var(--line); }
-    .line small { display: block; color: var(--muted); }
-    .qty button { width: 1.8rem; height: 1.8rem; border: 1px solid var(--line); background: #fff; border-radius: 4px; }
-    .foot { padding: 1rem; border-top: 1px solid var(--line); }
-    .total { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: .75rem; }
-    .foot .btn { width: 100%; text-align: center; }
-    .empty { color: var(--muted); }
-
-    @media (prefers-reduced-motion: reduce) { .panel { transition: none; } html { scroll-behavior: auto; } }
-  </style>
+/* Phones: list-style cards like mockup 3 */
+@media (max-width: 600px) {
+  .brand b { font-size: 1.15rem; }
+  .brand small { letter-spacing: .15em; }
+  .hero { flex-direction: column; align-items: flex-start; padding: 1.75rem 1.25rem; }
+  .hero svg { width: 6rem; }
+  .sec-head h2 { font-size: 1.3rem; }
+  .sec-head .sub { display: none; }
+  .grid { grid-template-columns: 1fr; }
+  .card { flex-direction: row; }
+  .pic { width: 38%; aspect-ratio: auto; min-height: 9rem; flex: none; }
+}
+@media (prefers-reduced-motion: reduce) { .panel { transition: none; } html { scroll-behavior: auto; } }
+</style>
 </head>
-
 <body>
 
-  <div class="topbar">
-    <div class="wrap">
-      <!-- EDIT: your shop name -->
-      <a class="brand" href="#top"><img src="logo.png" alt="Your Shop Name" class="logo"> Little Artist Club</a>
-      <button class="cart-btn" id="open-cart">Cart (<span id="count">0</span>)</button>
-    </div>
+<header class="topbar">
+  <div class="wrap bar">
+    <a class="brand" href="#top">
+      <img src="logo.png" alt="Little Artist Club logo" class="logo">
+      <span><b>Little Artist Club</b><small>Paint. Play. Create.</small></span>
+    </a>
+    <button class="cart-btn" id="open-cart">&#128722; Cart (<span id="count">0</span>)</button>
   </div>
+</header>
 
-  <main id="top">
-    <section class="hero wrap">
-      <!-- EDIT: your headline and intro -->
+<main id="top" class="wrap">
+  <div class="search"><input id="search" type="search" placeholder="Search products..." aria-label="Search products"></div>
+  <nav class="filters" id="filters" aria-label="Categories"></nav>
+
+  <section class="hero">
+    <div>
       <h1>Paint. Play. Create.</h1>
-      <p>Little Hands, Big Dreams.</p>
-      <a class="btn" href="#shop">Find Your Creation</a>
-    </section>
-
-    <section class="wrap" id="shop" aria-label="Shop">
-      <div class="filters" id="filters"></div>
-      <div class="grid" id="grid"></div>
-    </section>
-
-    <section class="band" id="about">
-      <div class="wrap">
-        <!-- EDIT: tell your story -->
-        <h2>About us</h2>
-        <p>Write a few sentences here about who you are, where you make your products, and why people love crafting with them.</p>
-      </div>
-    </section>
-
-    <section class="band" id="contact" style="border-top:0">
-      <div class="wrap">
-        <h2>Contact</h2>
-        <!-- EDIT: your real email -->
-        <p>Questions or custom orders? Email <a href="mailto:info.littleartistclub@gmail.com">info.littleartistclub@gmail.com</a>.</p>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="wrap">&copy; 2026 Little Artist Club</div>
-  </footer>
-
-  <!-- Cart panel -->
-  <aside class="panel" id="panel" aria-label="Your cart">
-    <header>
-      <h2>Your cart</h2>
-      <button class="close" id="close-cart" aria-label="Close cart">&times;</button>
-    </header>
-    <div class="items" id="items"></div>
-    <div class="foot">
-      <div class="total"><span>Total</span><span id="total">R0</span></div>
-      <a class="btn" id="checkout" href="#">Send order on WhatsApp</a>
+      <p>Little hands, big dreams.</p>
+      <a class="btn" href="#shop">Find Your Creation &rsaquo;</a>
     </div>
-  </aside>
+    <svg viewBox="0 0 120 70" fill="none" stroke-width="10" stroke-linecap="round" aria-hidden="true">
+      <path d="M10,65 A50,50 0 0 1 110,65" stroke="#E8AEB8"/>
+      <path d="M22,65 A38,38 0 0 1 98,65" stroke="#FBF4EC"/>
+      <path d="M34,65 A26,26 0 0 1 86,65" stroke="#9DB5A0"/>
+    </svg>
+  </section>
+
+  <div id="shop" aria-live="polite"></div>
+</main>
+
+<section class="band" id="about">
+  <div class="wrap">
+    <h2>About us</h2>
+    <p>Write a few sentences here about who you are, where you make your products, and why people love crafting with them.</p>
+  </div>
+</section>
+<section class="band" id="contact">
+  <div class="wrap">
+    <h2>Contact</h2>
+    <p>Questions or custom orders? Email <a href="mailto:info.littleartistclub@gmail.com">info.littleartistclub@gmail.com</a>.</p>
+  </div>
+</section>
+
+<footer><div class="wrap">&copy; 2026 Little Artist Club</div></footer>
+
+<aside class="panel" id="panel" aria-label="Your cart">
+  <header>
+    <h2>Your cart</h2>
+    <button class="close" id="close-cart" aria-label="Close cart">&times;</button>
+  </header>
+  <div class="items" id="items"></div>
+  <div class="foot">
+    <div class="total"><span>Total</span><span id="total">R0</span></div>
+    <a class="btn" id="checkout" href="#">Send order on WhatsApp</a>
+  </div>
+</aside>
 
 <script>
-  /* ============================================================
-     EDIT THIS SECTION TO RUN YOUR SHOP
-     ============================================================ */
+/* ============================================================
+   EDIT THIS SECTION TO RUN YOUR SHOP
+   ============================================================ */
+const WHATSAPP_NUMBER = "27662296278";   // country code + number, no plus or spaces
+const CURRENCY = "R";
 
-  // Your WhatsApp number: country code + number, no plus, no spaces.
-  // South Africa example: 082 123 4567 becomes 27821234567
-  const WHATSAPP_NUMBER = "27662296278";
+// Each product is one line:
+//   [id, "Name", "Category", price, "Description", "photo-file.jpg", "BADGE"]
+// The photo and badge are optional (for example "Best seller" or "New").
+// Every id must be different.
+const PRODUCTS = [
+  [1,"Single pack","Eco resin molds",39,"1 Figurine, 3 paint pots, 1 Brush."],
+  [2,"Double pack","Eco resin molds",59,"2 Figurines, 4 Paint pots, 1 Brush"],
+  [3,"Triple pack","Eco resin molds",79,"3 Figurines, 5 Paint pots, 1 Brush"],
+  [4,"Single Small","Wooden collection",49,"1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers."],
+  [5,"Single Medium","Wooden collection",59,"1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers."],
+  [6,"Single Large","Wooden collection",79,"1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers."],
+  [7,"Double Small","Wooden collection",75,"2 Wooden pieces, 4 Paint pots, 1 Brush, Gem stickers"],
+  [8,"Double Medium","Wooden collection",96,"2 Wooden pieces, 4 Paint pots, 1 Brush, Gem stickers"],
+  [9,"Special Large","Wooden collection",99,"1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers, Wool."],
+  [10,"3D Figurine Mini","3D Collection",119,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate"],
+  [11,"3D Figurine Small","3D Collection",139,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate"],
+  [12,"3D Figurine Medium","3D Collection",169,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate"],
+  [13,"3D Figurine Large","3D Collection",219,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport"],
+  [14,"3D Figurine X-Large","3D Collection",299,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport"],
+  [15,"3D Cat","3D Collection",39,"Figurine only"],
+  [16,"3D Husky","3D Collection",49,"Figurine only"],
+  [17,"3D Elephant","3D Collection",69,"Figurine only"],
+  [18,"3D Sharpei","3D Collection",99,"Figurine only"],
+  [19,"3D Lion","3D Collection",99,"Figurine only"],
+  [20,"3D Dino","3D Collection",99,"Figurine only"],
+  [21,"3D Angels","3D Collection",99,"Figurine only"],
+  [22,"3D Fairy on Flower","3D Collection",99,"Figurine only"],
+  [23,"3D Gorilla","3D Collection",149,"Figurine only"],
+  [24,"Blessed Cross Kit","Faith Collection",89,"1 Figurine, 3 Paint pots, 2 Brushes, Mini palette"],
+  [25,"Blessed Cross","Faith Collection",49,"Figurine only"],
+  [26,"Faith Cross Kit","Faith Collection",89,"1 Figurine, 3 Paint pots, 2 Brushes, Mini palette"],
+  [27,"Faith Cross","Faith Collection",49,"Figurine only"],
+  [28,"God is Good Kit","Faith Collection",120,"1 Figurine, 4 Paint pots, 2 Brushes, Mini palette"],
+  [29,"God is Good","Faith Collection",59,"Figurine only"],
+  [30,"Angel Girl Kit","Faith Collection",140,"1 Figurine, 4 Paint pots, 2 Brushes, Mini palette"],
+  [31,"Angel Girl","Faith Collection",69,"Figurine only"],
+  [32,"2 Piece Faith Box","Faith Collection",179,"2 Faith Figurines (of your choice), 5 Paint pots, 2 Brushes, Mini palette, Passport"],
+  [33,"3 Piece Faith Box","Faith Collection",249,"3 Faith Figurines (of your choice), 6 Paint pots, 2 Brushes, Mini palette, Passport"],
+  [34,"4 Piece Faith Box","Faith Collection",299,"4 Faith Figurines (of your choice), 8 Paint pots, 2 Brushes, Mini palette, Passport"],
+  [35,"Personalisation Kit","Letters & Numbers",179,"Personalised name (up to 5 letters), 5 Paint pots, 1 Brush, Mini palette, Passport"],
+  [36,"Single Letter/Number","Letters & Numbers",20,"1 Letter or Number of your choice"],
+  [37,"9 Donut Creative set","Donut Bar",799,"1 Donut stand, 9 Large Donuts, 6 Paint pots, 2 Brushes"],
+  [38,"18 Donut Creative set","Donut Bar",1099,"1 Donut stand, 18 Large Donuts, 12 Paint pots, 3 Brushes"],
+  [39,"9 Artists Party set","Donut Bar",899,"1 Donut stand, 9 Large Donuts, 27 Paint pots, 9 Brushes"],
+  [40,"18 Artists Party set","Donut Bar",1399,"1 Donut stand, 18 Large Donuts, 54 Paint pots, 18 Brushes"],
+  [41,"Donut Stand","Donut Bar",499,"Donut stand only"],
+  [42,"Donut stand personalisation","Donut Bar",80,"Add a personalised name to your donut stand"],
+  [43,"Sip & Paint Essential","Sip & Paint Boxes",329,"1 Large Canvas, 1 Wooden Easel, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game"],
+  [44,"Sip & Paint Signature","Sip & Paint Boxes",429,"1 Large Canvas, 1 Wooden Easel, 3 Flower Figurines, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box"],
+  [45,"Sip & Paint Signature (2 canvases)","Sip & Paint Boxes",499,"2 Large Canvases, 1 Wooden Easel, 3 Flower Figurines, 12 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box, Personalised Tag (optional)"],
+  [46,"Rainbow Artwork Display set","Wall Hanging",399,"Wall hanging display to attach artwork"],
+  [47,"Mermaid Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
+  [48,"Butterfly Hanging Shelf","Wall Hanging",499,"Wall hanging butterfly shelf."],
+  [49,"Unicorn Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
+  [50,"30 Piece Art & Crafts Set (Pink)","Crafting Kit",75,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots"],
+  [51,"30 Piece Art & Crafts Set (Blue)","Crafting Kit",75,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots"],
+  [52,"Glitter and Gem Decoration Kit","Arts and crafts",75,"Finishing touches for any painted project."]
+].map(([id, name, category, price, description, image = "", badge = ""]) => ({ id, name, category, price, description, image, badge }));
 
-  // Your products. To add one, copy a whole { ... }, line and change the details.
-  //   image: upload the photo to your GitHub repository, then type its file name
-  //          (for example "unicorn-mold.jpg"). Leave as "" to show a coloured tile.
-  //   color: the tile colour shown when there is no image.
-  const PRODUCTS = [
-    { id: 1,  name: "Single pack",                       category: "Eco resin molds", price: 39, description: "1 Figurine, 3 paint pots, 1 Brush.", image: "", color: "#2f5bd8" },
-    { id: 2,  name: "Double pack",                       category: "Eco resin molds", price: 59, description: "2 Figurines, 4 Paint pots, 1 Brush", image: "", color: "#2f5bd8" },
-    { id: 3,  name: "Triple pack",                       category: "Eco resin molds", price: 79, description: "3 Figurines, 5 Paint pots, 1 Brush", image: "", color: "#8a5a2b" },
-    { id: 4,  name: "Single Small",                      category: "Wooden collection", price: 49, description: "1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers.", image: "", color: "#8a5a2b" },
-    { id: 5,  name: "Single Medium",                     category: "Wooden collection", price: 59, description: "1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers.", image: "", color: "#b3489a" },
-    { id: 6,  name: "Single Large",                      category: "Wooden collection", price: 79, description: "1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers.", image: "", color: "#2e8b57" },
-    { id: 7,  name: "Double Small",                      category: "Wooden collection", price: 75, description: "2 Wooden pieces, 4 Paint pots, 1 Brush, Gem stickers", image: "", color: "#d1495b" },
-    { id: 8,  name: "Double Medium",                     category: "Wooden collection", price: 96, description: "2 Wooden pieces, 4 Paint pots, 1 Brush, Gem stickers", image: "", color: "#6a4c93" },
-    { id: 9,  name: "Special Large",                     category: "Wooden collection", price: 99, description: "1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers, Wool.", image: "", color: "#6a4c93" },
-    { id: 10,  name: "3D Figurine Mini",                 category: "3D Collection", price: 119, description: "1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate", image: "", color: "#6a4c93" },
-    { id: 11,  name: "3D Figurine Small",                category: "3D Collection", price: 139, description: "1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate", image: "", color: "#6a4c93" },
-    { id: 12,  name: "3D Figurine Medium",               category: "3D Collection", price: 169, description: "1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate", image: "", color: "#6a4c93" },
-    { id: 13,  name: "3D Figurine Large",                category: "3D Collection", price: 219, description: "1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport", image: "", color: "#6a4c93" },
-    { id: 14,  name: "3D Figurine X-Large",              category: "3D Collection", price: 299, description: "1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport", image: "", color: "#6a4c93" },
-    { id: 15,  name: "3D Cat",                           category: "3D Collection", price: 39, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 16,  name: "3D Husky",                         category: "3D Collection", price: 49, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 17,  name: "3D Elephant",                      category: "3D Collection", price: 69, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 18,  name: "3D Sharpei",                       category: "3D Collection", price: 99, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 19,  name: "3D Lion",                          category: "3D Collection", price: 99, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 20,  name: "3D Dino",                          category: "3D Collection", price: 99, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 21,  name: "3D Angels",                        category: "3D Collection", price: 99, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 22,  name: "3D Fairy on Flower",               category: "3D Collection", price: 99, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 23,  name: "3D Gorilla",                       category: "3D Collection", price: 149, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 24,  name: "Blessed Cross Kit",                category: "Faith Collection", price: 89, description: "1 Figurine, 3 Paint pots, 2 Brushes, Mini palette", image: "", color: "#6a4c93" },
-    { id: 25,  name: "Blessed Cross",                    category: "Faith Collection", price: 49, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 26,  name: "Faith Cross Kit",                  category: "Faith Collection", price: 89, description: "1 Figurine, 3 Paint pots, 2 Brushes, Mini palette", image: "", color: "#6a4c93" },
-    { id: 27,  name: "Faith Cross",                      category: "Faith Collection", price: 49, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 28,  name: "God is Good Kit",                  category: "Faith Collection", price: 120, description: "1 Figurine, 4 Paint pots, 2 Brushes, Mini palette", image: "", color: "#6a4c93" },
-    { id: 29,  name: "God is Good",                      category: "Faith Collection", price: 59, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 30,  name: "Angel Girl Kit",                   category: "Faith Collection", price: 140, description: "1 Figurine, 4 Paint pots, 2 Brushes, Mini palette", image: "", color: "#6a4c93" },
-    { id: 31,  name: "Angel Girl",                       category: "Faith Collection", price: 69, description: "Figurine only", image: "", color: "#6a4c93" },
-    { id: 32,  name: "2 Piece Faith Box",                category: "Faith Collection", price: 179, description: "2 Faith Figurines (of your choice), 5 Paint pots, 2 Brushes, Mini palette, Passport", image: "", color: "#6a4c93" },
-    { id: 33,  name: "3 Piece Faith Box",                category: "Faith Collection", price: 249, description: "3 Faith Figurines (of your choice), 6 Paint pots, 2 Brushes, Mini palette, Passport", image: "", color: "#6a4c93" },
-    { id: 34,  name: "4 Piece Faith Box",                category: "Faith Collection", price: 299, description: "4 Faith Figurines (of your choice), 8 Paint pots, 2 Brushes, Mini palette, Passport", image: "", color: "#6a4c93" },
-    { id: 35,  name: "Personalisation Kit",              category: "Letters & Numbers", price: 179, description: "Personalised name (up to 5 letters), 5 Paint pots, 1 Brush, Mini palette, Passport", image: "", color: "#6a4c93" },
-    { id: 36,  name: "Single Letter/Number",             category: "Letters & Numbers", price: 20, description: "1 Letter or Number of your choice", image: "", color: "#6a4c93" },
-    { id: 37,  name: "9 Donut Creative set",             category: "Donut Bar", price: 799, description: "1 Donut stand, 9 Large Donuts, 6 Paint pots, 2 Brushes", image: "", color: "#6a4c93" },
-    { id: 38,  name: "18 Donut Creative set",            category: "Donut Bar", price: 1099, description: "1 Donut stand, 18 Large Donuts, 12 Paint pots, 3 Brushes", image: "", color: "#6a4c93" },
-    { id: 39,  name: "9 Artists Party set",              category: "Donut Bar", price: 899, description: "1 Donut stand, 9 Large Donuts, 27 Paint pots, 9 Brushes", image: "", color: "#6a4c93" },
-    { id: 40,  name: "18 Artists Party set",             category: "Donut Bar", price: 1399, description: "1 Donut stand, 18 Large Donuts, 54 Paint pots, 18 Brushes", image: "", color: "#6a4c93" },
-    { id: 41,  name: "Donut Stand",                      category: "Donut Bar", price: 499, description: "Donut stand only", image: "", color: "#6a4c93" },
-    { id: 42,  name: "Donut stand personalisation",      category: "Donut Bar", price: 80, description: "Add a personalised name to your donut stand", image: "", color: "#6a4c93" },
-    { id: 43,  name: "Sip & Paint Essential",            category: "Sip & Paint Boxes", price: 329, description: "1 Large Canvas, 1 Wooden Esel, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game", image: "", color: "#6a4c93" },
-    { id: 44,  name: "Sip & Paint Signature",            category: "Sip & Paint Boxes", price: 429, description: "1 Large Canvas, 1 Wooden Esel, 3 Flower Figurines, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box", image: "", color: "#6a4c93" },
-    { id: 45,  name: "Sip & Paint Signature",            category: "Sip & Paint Boxes", price: 499, description: "2 Large Canvases, 1 Wooden Esel, 3 Flower Figurines, 12 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box, Personalised Tag (optional)", image: "", color: "#6a4c93" },
-    { id: 46,  name: "Rainbow Artwork Display set",      category: "Wall Hanging", price: 399, description: "Wall hanging display to attach artwork", image: "", color: "#6a4c93" },
-    { id: 47,  name: "Mermaid Hair Clip Holder",         category: "Wall Hanging", price: 399, description: "Wall hanging display to attach hair clips", image: "", color: "#6a4c93" },
-    { id: 48,  name: "Butterfly Hanging Shelf",          category: "Wall Hanging", price: 499, description: "Wall hanging butterfly shelf.", image: "", color: "#6a4c93" },
-    { id: 49,  name: "Unicorn Hair Clip Holder",         category: "Wall Hanging", price: 399, description: "Wall hanging display to attach hair clips", image: "", color: "#6a4c93" },
-    { id: 50,  name: "30 Piece Art & Crafts Set (Pink)", category: "Crafting Kit", price: 75, description: "1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack,1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots", image: "", color: "#6a4c93" },
-    { id: 51,  name: "30 Piece Art & Crafts Set (Blue)", category: "Crafting Kit", price: 75, description: "1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack,1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots", image: "", color: "#6a4c93" },
-    { id: 8,  name: "Glitter and Gem Decoration Kit", category: "Arts and crafts", price: 75, description: "Finishing touches for any painted project.", image: "", color: "#6a4c93" },
-    { id: 8,  name: "Glitter and Gem Decoration Kit", category: "Arts and crafts", price: 75, description: "Finishing touches for any painted project.", image: "", color: "#6a4c93" },
+// Icon and short line shown for each category
+const CATS = {
+  "Eco resin molds":   ["\u{1F343}", "Create stunning resin pieces."],
+  "Wooden collection": ["\u{1F332}", "Paint, decorate and personalise."],
+  "3D Collection":     ["\u{1F9CA}", "Fun 3D figurines to paint."],
+  "Faith Collection":  ["\u2661",    "Create with purpose."],
+  "Letters & Numbers": ["123",       "Spell it out in colour."],
+  "Donut Bar":         ["\u{1F369}", "Party-ready painting fun."],
+  "Sip & Paint Boxes": ["\u{1F377}", "Relax, sip and create."],
+  "Wall Hanging":      ["\u{1F5BC}\uFE0F", "Show off their artwork."],
+  "Crafting Kit":      ["\u2702\uFE0F",    "Everything in one box."],
+  "Arts and crafts":   ["\u{1F308}", "Finishing touches."]
+};
 
-  ];
+/* ============================================================
+   SHOP CODE (you do not need to change anything below)
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const money = (n) => CURRENCY + n.toLocaleString("en-ZA");
+const cats = [...new Set(PRODUCTS.map(p => p.category))];
+let cart = [];
+let activeCategory = "All";
 
-  const CURRENCY = "R";
+try { cart = JSON.parse(localStorage.getItem("cart") || "[]"); } catch (e) { cart = []; }
+function saveCart() { try { localStorage.setItem("cart", JSON.stringify(cart)); } catch (e) {} }
 
-  /* ============================================================
-     SHOP CODE (you do not need to change anything below)
-     ============================================================ */
-
-  const $ = (id) => document.getElementById(id);
-  let cart = [];
-  let activeCategory = "All";
-
-  // Load a saved cart if this browser has one
-  try { cart = JSON.parse(localStorage.getItem("cart") || "[]"); } catch (e) { cart = []; }
-  function saveCart() { try { localStorage.setItem("cart", JSON.stringify(cart)); } catch (e) {} }
-
-  const money = (n) => CURRENCY + n.toLocaleString("en-ZA");
-
-  function renderFilters() {
-    const cats = ["All", ...new Set(PRODUCTS.map(p => p.category))];
-    $("filters").innerHTML = "";
-    cats.forEach(c => {
-      const b = document.createElement("button");
-      b.textContent = c;
-      b.setAttribute("aria-pressed", c === activeCategory);
-      b.onclick = () => { activeCategory = c; renderFilters(); renderGrid(); };
-      $("filters").appendChild(b);
-    });
-  }
-
-  function renderGrid() {
-    const list = PRODUCTS.filter(p => activeCategory === "All" || p.category === activeCategory);
-    $("grid").innerHTML = list.map(p => `
-      <article class="card">
-        <div class="pic" style="background:${p.color}">
-          ${p.image ? `<img src="${p.image}" alt="${p.name}">` : p.name}
-        </div>
-        <div class="info">
-          <h3>${p.name}</h3>
-          <p class="cat">${p.category}</p>
-          <p class="desc">${p.description}</p>
-          <div class="buy">
-            <span class="price">${money(p.price)}</span>
-            <button class="add" data-id="${p.id}">Add to cart</button>
-          </div>
-        </div>
-      </article>`).join("");
-    document.querySelectorAll(".add").forEach(b => b.onclick = () => addToCart(Number(b.dataset.id)));
-  }
-
-  function addToCart(id) {
-    const found = cart.find(i => i.id === id);
-    if (found) found.qty++; else cart.push({ id, qty: 1 });
-    renderCart();
-    $("panel").classList.add("open");
-  }
-
-  function changeQty(id, delta) {
-    const item = cart.find(i => i.id === id);
-    if (!item) return;
-    item.qty += delta;
-    cart = cart.filter(i => i.qty > 0);
-    renderCart();
-  }
-
-  function renderCart() {
-    saveCart();
-    const lines = cart.map(i => ({ ...PRODUCTS.find(p => p.id === i.id), qty: i.qty })).filter(l => l.name);
-    const total = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
-
-    $("count").textContent = lines.reduce((n, l) => n + l.qty, 0);
-    $("total").textContent = money(total);
-
-    $("items").innerHTML = lines.length ? lines.map(l => `
-      <div class="line">
-        <div>${l.name}<small>${money(l.price)} each</small></div>
-        <div class="qty">
-          <button onclick="changeQty(${l.id}, -1)" aria-label="Remove one">-</button>
-          ${l.qty}
-          <button onclick="changeQty(${l.id}, 1)" aria-label="Add one">+</button>
-        </div>
-      </div>`).join("") : '<p class="empty">Your cart is empty. Add something from the shop.</p>';
-
-    const message = encodeURIComponent(
-      "Hi, I would like to order:\n" +
-      lines.map(l => `${l.qty} x ${l.name} (${money(l.price * l.qty)})`).join("\n") +
-      `\nTotal: ${money(total)}`
-    );
-    $("checkout").href = lines.length ? `https://wa.me/${WHATSAPP_NUMBER}?text=${message}` : "#";
-  }
-
-  $("open-cart").onclick = () => $("panel").classList.add("open");
-  $("close-cart").onclick = () => $("panel").classList.remove("open");
-
+// Wishlist (hearts) is remembered in this browser
+let wish = [];
+try { wish = JSON.parse(localStorage.getItem("wish") || "[]"); } catch (e) { wish = []; }
+CATS["Saved"] = ["\u2665", "Your favourites."];
+function toggleWish(id) {
+  wish = wish.includes(id) ? wish.filter(i => i !== id) : [...wish, id];
+  try { localStorage.setItem("wish", JSON.stringify(wish)); } catch (e) {}
   renderFilters();
-  renderGrid();
+  if (activeCategory === "Saved" && !$("search").value.trim()) { renderShop(); return; }
+  const on = wish.includes(id);
+  document.querySelectorAll(`.heart[data-id="${id}"]`).forEach(h => { h.setAttribute("aria-pressed", on); h.textContent = on ? "\u2665" : "\u2661"; });
+}
+
+function renderFilters() {
+  $("filters").innerHTML = "";
+  ["All", ...cats, "Saved"].forEach(c => {
+    const b = document.createElement("button");
+    b.innerHTML = `<span class="ico">${c === "All" ? "\u25A6" : (CATS[c] || ["\u2726"])[0]}</span>${c === "Saved" ? `Saved (${wish.length})` : c}`;
+    b.setAttribute("aria-pressed", c === activeCategory);
+    b.onclick = () => { activeCategory = c; $("search").value = ""; renderFilters(); renderShop(); };
+    $("filters").appendChild(b);
+  });
+}
+
+function card(p) {
+  return `<article class="card">
+    <div class="pic">${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy">` : `<span>${p.name}</span>`}${p.badge ? `<em class="badge">${p.badge}</em>` : ""}<button class="heart" data-id="${p.id}" aria-pressed="${wish.includes(p.id)}" aria-label="Save ${p.name} to wishlist">${wish.includes(p.id) ? "\u2665" : "\u2661"}</button></div>
+    <div class="info">
+      <p class="cat">${p.category}</p>
+      <h3>${p.name}</h3>
+      <p class="desc">${p.description}</p>
+      <div class="buy"><span class="price">${money(p.price)}</span><button class="add" data-id="${p.id}">Add to cart</button></div>
+    </div></article>`;
+}
+
+function section(c, items, preview) {
+  const info = CATS[c] || ["\u2726", ""];
+  return `<section><div class="sec-head"><span class="ico">${info[0]}</span>
+    <div><h2>${c}</h2><span class="sub">${info[1]}</span></div>
+    ${preview && items.length > 4 ? `<button class="more" data-cat="${c}">View all &rsaquo;</button>` : ""}</div>
+    <div class="grid">${(preview ? items.slice(0, 4) : items).map(card).join("")}</div></section>`;
+}
+
+function renderShop() {
+  const q = $("search").value.trim().toLowerCase();
+  let html;
+  if (q) {
+    const hits = PRODUCTS.filter(p => (p.name + " " + p.category + " " + p.description).toLowerCase().includes(q));
+    html = hits.length ? `<div class="grid" style="margin-top:1.5rem">${hits.map(card).join("")}</div>` : `<p class="empty">No products match "${q.replace(/</g, "&lt;")}".</p>`;
+  } else if (activeCategory === "Saved") {
+    const saved = PRODUCTS.filter(p => wish.includes(p.id));
+    html = saved.length ? section("Saved", saved, false) : `<p class="empty" style="margin-top:1.5rem">Nothing saved yet. Tap the heart on a product to save it here.</p>`;
+  } else if (activeCategory === "All") {
+    html = cats.map(c => section(c, PRODUCTS.filter(p => p.category === c), true)).join("");
+  } else {
+    html = section(activeCategory, PRODUCTS.filter(p => p.category === activeCategory), false);
+  }
+  $("shop").innerHTML = html;
+  document.querySelectorAll(".add").forEach(b => b.onclick = () => addToCart(Number(b.dataset.id)));
+  document.querySelectorAll(".heart").forEach(h => h.onclick = () => toggleWish(Number(h.dataset.id)));
+  document.querySelectorAll(".more").forEach(b => b.onclick = () => {
+    activeCategory = b.dataset.cat; renderFilters(); renderShop(); $("shop").scrollIntoView({ behavior: "smooth" });
+  });
+}
+
+function addToCart(id) {
+  const found = cart.find(i => i.id === id);
+  if (found) found.qty++; else cart.push({ id, qty: 1 });
   renderCart();
+  $("panel").classList.add("open");
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.qty += delta;
+  cart = cart.filter(i => i.qty > 0);
+  renderCart();
+}
+
+function renderCart() {
+  saveCart();
+  const lines = cart.map(i => ({ ...PRODUCTS.find(p => p.id === i.id), qty: i.qty })).filter(l => l.name);
+  const total = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
+  $("count").textContent = lines.reduce((n, l) => n + l.qty, 0);
+  $("total").textContent = money(total);
+  $("items").innerHTML = lines.length ? lines.map(l => `
+    <div class="line">
+      <div>${l.name}<small>${money(l.price)} each</small></div>
+      <div class="qty">
+        <button onclick="changeQty(${l.id}, -1)" aria-label="Remove one">-</button>
+        ${l.qty}
+        <button onclick="changeQty(${l.id}, 1)" aria-label="Add one">+</button>
+      </div>
+    </div>`).join("") : '<p class="empty">Your cart is empty. Add something from the shop.</p>';
+  const message = encodeURIComponent(
+    "Hi, I would like to order:\n" +
+    lines.map(l => `${l.qty} x ${l.name} (${money(l.price * l.qty)})`).join("\n") +
+    `\nTotal: ${money(total)}`
+  );
+  $("checkout").href = lines.length ? `https://wa.me/${WHATSAPP_NUMBER}?text=${message}` : "#";
+}
+
+$("open-cart").onclick = () => $("panel").classList.add("open");
+$("close-cart").onclick = () => $("panel").classList.remove("open");
+$("search").oninput = renderShop;
+
+renderFilters();
+renderShop();
+renderCart();
 </script>
 </body>
 </html>
