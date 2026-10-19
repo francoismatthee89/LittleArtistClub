@@ -122,6 +122,18 @@ body:has(dialog[open]) { overflow: hidden; }
 .opt { display: flex; flex-direction: column; gap: .35rem; font-weight: 500; font-size: .85rem; }
 .opt select { padding: .65rem .9rem; border: 2px solid #EDB9C2; border-radius: 12px; background: #fff; font: 400 1rem var(--body); color: var(--ink); }
 .opt-err { margin: 0; color: #B3414F; font-weight: 500; font-size: .85rem; }
+/* About / Our Story */
+.band .story { max-width: 50rem; }
+.band .story p { max-width: none; margin: 0 0 1rem; font-weight: 300; }
+.story h2 { font-size: 2.2rem; }
+.story h3 { font: 600 1.5rem/1.3 var(--heading); margin: 2.25rem 0 .75rem; }
+.story .kicker { font-weight: 500; font-size: .75rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+.story .kicker.end { text-align: center; margin: 2rem 0 0; }
+.story .signoff { margin-top: 1.5rem; font-family: var(--heading); font-size: 1.15rem; }
+.values { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.value { background: #fff; border: 2px solid #EDB9C2; border-radius: 16px; padding: 1rem 1.1rem; }
+.value h4 { margin: 0 0 .4rem; font: 600 1.05rem/1.3 var(--heading); }
+.value p { margin: 0 !important; font-size: .92rem; }  
 
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
@@ -176,79 +188,45 @@ body:has(dialog[open]) { overflow: hidden; }
 </main>
 
 <section class="band" id="about">
-  <div class="wrap">
+  <div class="wrap story">
     <h2>Our Story ♡</h2>
-    <p>Little Artist Club
+    <p class="kicker">Little Artist Club<br>Where Little Hands Create Big Dreams</p>
 
-Where Little Hands Create Big Dreams
+    <p>At Little Artist Club, we believe that the most beautiful memories are made with a little imagination, a splash of colour, and a whole lot of love.</p>
+    <p>Born from a passion for creativity and a dream of bringing joy to little hearts, Little Artist Club is more than just a small business. It’s a place where imagination comes to life, creativity is celebrated, and every little masterpiece tells its own special story.</p>
+    <p>We believe childhood should be filled with wonder, laughter, colourful little fingers, and those precious moments that become treasured memories.</p>
+    <p>Because to us, it’s never just about painting. It’s about the magic of creating something with your own two hands.</p>
 
-At Little Artist Club, we believe that the most beautiful memories are made with a little imagination, a splash of colour, and a whole lot of love.
+    <h3>Thoughtfully Created, Beautifully Made ♡</h3>
+    <p>From our adorable paint-your-own plaster figurines and wooden creations to our personalised party favours, creative gift sets, beautiful craft collections, and Sip &amp; Paint experiences, everything we offer is designed to inspire creativity and bring people together.</p>
+    <p>Whether it’s a little one proudly holding up their very first masterpiece, a birthday celebration filled with happy smiles, or friends and family sharing a creative afternoon, we believe these little moments are what make life so special.</p>
+    <p>Every creation is an opportunity to explore, imagine, learn, and make something wonderfully unique.</p>
 
-Born from a passion for creativity and a dream of bringing joy to little hearts, Little Artist Club is more than just a small business. It’s a place where imagination comes to life, creativity is celebrated, and every little masterpiece tells its own special story.
+    <h3>The Heart Behind Little Artist Club ♡</h3>
+    <p>As a proudly South African small business, we believe that the smallest details often leave the biggest impressions.</p>
+    <p>Everything we create is guided by the values closest to our hearts.</p>
 
-We believe childhood should be filled with wonder, laughter, colourful little fingers, and those precious moments that become treasured memories.
+    <div class="values">
+      <div class="value"><h4>♡ Creativity Without Limits</h4><p>We believe every artist, big or small, deserves the freedom to explore their imagination and create something uniquely their own.</p></div>
+      <div class="value"><h4>♡ Making Beautiful Memories</h4><p>Our creations are about more than arts and crafts. They’re about quality time, shared laughter, meaningful connections, and moments worth remembering.</p></div>
+      <div class="value"><h4>♡ Celebrating Every Little Artist</h4><p>No two masterpieces are ever the same, and that’s exactly what makes them beautiful. We celebrate individuality, imagination, and the confidence that grows with every creation.</p></div>
+      <div class="value"><h4>♡ Love in Every Little Detail</h4><p>From carefully chosen designs to thoughtful packaging and personalised finishing touches, we pour love and care into making every order feel extra special.</p></div>
+      <div class="value"><h4>♡ Creating Joy, One Masterpiece at a Time</h4><p>Nothing makes us happier than seeing little faces light up with pride and hearing those magical words: “Look what I made!”</p></div>
+    </div>
 
-Because to us, it’s never just about painting. It’s about the magic of creating something with your own two hands.
+    <h3>More Than Just an Art Kit ♡</h3>
+    <p>When you choose Little Artist Club, you’re choosing more than a product.</p>
+    <p>You’re choosing an experience, a moment of happiness, an opportunity to create, and a memory waiting to be made.</p>
+    <p>Behind every order is a small business with a big dream, a genuine love for creativity, and a heartfelt appreciation for every person who chooses to support us.</p>
+    <p>Our hope is that every Little Artist Club creation finds its way into happy little hands, inspires beautiful imaginations, and becomes part of a memory that lasts long after the paint has dried.</p>
 
-Thoughtfully Created, Beautifully Made ♡
+    <h3>From Our Heart to Yours ♡</h3>
+    <p>Thank you for supporting our dream, believing in what we create, and allowing us to be part of your birthdays, celebrations, special occasions, and everyday moments of joy.</p>
+    <p>Every order, every kind word, and every little masterpiece means more to us than you could ever imagine.</p>
+    <p>Here’s to colourful adventures, endless imagination, and a lifetime of beautiful little memories.</p>
 
-From our adorable paint-your-own plaster figurines and wooden creations to our personalised party favours, creative gift sets, beautiful craft collections, and Sip & Paint experiences, everything we offer is designed to inspire creativity and bring people together.
-
-Whether it’s a little one proudly holding up their very first masterpiece, a birthday celebration filled with happy smiles, or friends and family sharing a creative afternoon, we believe these little moments are what make life so special.
-
-Every creation is an opportunity to explore, imagine, learn, and make something wonderfully unique.
-
-The Heart Behind Little Artist Club ♡
-
-As a proudly South African small business, we believe that the smallest details often leave the biggest impressions.
-
-Everything we create is guided by the values closest to our hearts.
-
-♡ Creativity Without Limits
-
-We believe every artist, big or small, deserves the freedom to explore their imagination and create something uniquely their own.
-
-♡ Making Beautiful Memories
-
-Our creations are about more than arts and crafts. They’re about quality time, shared laughter, meaningful connections, and moments worth remembering.
-
-♡ Celebrating Every Little Artist
-
-No two masterpieces are ever the same, and that’s exactly what makes them beautiful. We celebrate individuality, imagination, and the confidence that grows with every creation.
-
-♡ Love in Every Little Detail
-
-From carefully chosen designs to thoughtful packaging and personalised finishing touches, we pour love and care into making every order feel extra special.
-
-♡ Creating Joy, One Masterpiece at a Time
-
-Nothing makes us happier than seeing little faces light up with pride and hearing those magical words: “Look what I made!”
-
-More Than Just an Art Kit ♡
-
-When you choose Little Artist Club, you’re choosing more than a product.
-
-You’re choosing an experience, a moment of happiness, an opportunity to create, and a memory waiting to be made.
-
-Behind every order is a small business with a big dream, a genuine love for creativity, and a heartfelt appreciation for every person who chooses to support us.
-
-Our hope is that every Little Artist Club creation finds its way into happy little hands, inspires beautiful imaginations, and becomes part of a memory that lasts long after the paint has dried.
-
-From Our Heart to Yours ♡
-
-Thank you for supporting our dream, believing in what we create, and allowing us to be part of your birthdays, celebrations, special occasions, and everyday moments of joy.
-
-Every order, every kind word, and every little masterpiece means more to us than you could ever imagine.
-
-Here’s to colourful adventures, endless imagination, and a lifetime of beautiful little memories.
-
-With love and a sprinkle of creativity,
-
-Little Artist Club ♡
-
-Small Hands. Big Dreams. Beautiful Creations.
-
-PAINT • PLAY • CREATE</p>
+    <p class="signoff">With love and a sprinkle of creativity,<br><strong>Little Artist Club ♡</strong></p>
+    <p class="kicker end">Small Hands. Big Dreams. Beautiful Creations.<br>PAINT • PLAY • CREATE</p>
   </div>
 </section>
 <section class="band" id="contact">
