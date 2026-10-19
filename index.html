@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Little Artists Club | Paint. Play. Create.</title>
-<link rel="icon" type="image/png" href="favicon.png">
+<title>Little Artist Club | Paint. Play. Create.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -106,8 +105,7 @@ footer { padding: 1.25rem 0; text-align: center; font-weight: 500; font-size: .8
 .card { cursor: pointer; transition: box-shadow .2s; }
 .card:hover { box-shadow: 0 6px 16px rgba(88,122,98,.25); }
 body:has(dialog[open]) { overflow: hidden; }
-.dlg { border: 2px solid #EDB9C2; padding: 0; border-radius: 22px; width: min(52rem, 92vw); max-height: 90vh; overflow: auto; background: #fff; color: var(--ink); }
-.dlg .pic { background: #fff; }
+.dlg { border: 0; padding: 0; border-radius: 22px; width: min(52rem, 92vw); max-height: 90vh; overflow: auto; background: var(--blush); color: var(--ink); }
 .dlg::backdrop { background: rgba(43,58,47,.55); }
 .dlg-body { display: grid; grid-template-columns: 1fr 1fr; }
 .dlg .pic { aspect-ratio: auto; min-height: 22rem; font-size: 1.3rem; }
@@ -119,9 +117,10 @@ body:has(dialog[open]) { overflow: hidden; }
 .dlg-info .full { margin: 0; font-weight: 300; font-size: 1rem; }
 .dlg-info .price { font-size: 1.5rem; }
 .dlg-info .buy { margin-top: auto; }
+
 .opt { display: flex; flex-direction: column; gap: .35rem; font-weight: 500; font-size: .85rem; }
 .opt select { padding: .65rem .9rem; border: 2px solid #EDB9C2; border-radius: 12px; background: #fff; font: 400 1rem var(--body); color: var(--ink); }
-.opt-err { margin: 0; color: #B3414F; font-weight: 500; font-size: .85rem; }  
+.opt-err { margin: 0; color: #B3414F; font-weight: 500; font-size: .85rem; }
 
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
@@ -148,8 +147,8 @@ body:has(dialog[open]) { overflow: hidden; }
 <header class="topbar">
   <div class="wrap bar">
     <a class="brand" href="#top">
-      <img src="logo.png" alt="Little Artists Club logo" class="logo">
-      <span><b>Little Artists Club</b><small>Paint. Play. Create.</small></span>
+      <img src="logo.png" alt="Little Artist Club logo" class="logo">
+      <span><b>Little Artist Club</b><small>Paint. Play. Create.</small></span>
     </a>
     <button class="cart-btn" id="open-cart">&#128722; Cart (<span id="count">0</span>)</button>
   </div>
@@ -213,37 +212,37 @@ body:has(dialog[open]) { overflow: hidden; }
    ============================================================ */
 const WHATSAPP_NUMBER = "27662296278";   // country code + number, no plus or spaces
 const CURRENCY = "R";
-const OPTION_IDS = [1, 2, 3];   // products that need a theme chosen (the ids from your product list)
-const THEMES = ["Dino","Space","Under the sea","Planes","Christmas","Princess","Race cars","Farming","Number & Letters","Forest animals","Tractors","Unicorns","Highland cows","Safari animals","Owl","Bee","Donuts","Alpacas","Dogs","Cats","Pigs","Enchanted fairy garden","Pineapples","Gaming","Butterfly garden","Bunnies","Flowers","Sweets"];  
+const OPTION_IDS = [1, 2, 3];   // products that need a theme chosen (ids from the product list)
+const THEMES = ["Dino","Space","Under the sea","Planes","Christmas","Princess","Race cars","Farming","Number & Letters","Forest animals","Tractors","Unicorns","Highland cows","Safari animals","Owl","Bee","Donuts","Alpacas","Dogs","Cats","Pigs","Enchanted fairy garden","Pineapples","Gaming","Butterfly garden","Bunnies","Flowers","Sweets"];
 
 // Each product is one line:
 //   [id, "Name", "Category", price, "Description", "photo-file.jpg", "BADGE"]
 // The photo and badge are optional (for example "Best seller" or "New").
 // Every id must be different.
 const PRODUCTS = [
-  [1,"Single pack","Eco resin molds",39,"1 Figurine, 3 paint pots, 1 Brush.","SingleMould.jpeg"],
-  [2,"Double pack","Eco resin molds",59,"2 Figurines, 4 Paint pots, 1 Brush","DoubleMould.jpeg"],
-  [3,"Triple pack","Eco resin molds",79,"3 Figurines, 5 Paint pots, 1 Brush","TripleMould.jpeg"],
+  [1,"Single pack","Eco resin molds",39,"1 Figurine, 3 paint pots, 1 Brush."],
+  [2,"Double pack","Eco resin molds",59,"2 Figurines, 4 Paint pots, 1 Brush"],
+  [3,"Triple pack","Eco resin molds",79,"3 Figurines, 5 Paint pots, 1 Brush"],
   [4,"Single Small","Wooden collection",49,"1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers."],
   [5,"Single Medium","Wooden collection",59,"1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers."],
   [6,"Single Large","Wooden collection",79,"1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers."],
   [7,"Double Small","Wooden collection",75,"2 Wooden pieces, 4 Paint pots, 1 Brush, Gem stickers"],
   [8,"Double Medium","Wooden collection",96,"2 Wooden pieces, 4 Paint pots, 1 Brush, Gem stickers"],
   [9,"Special Large","Wooden collection",99,"1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers, Wool."],
-  [10,"3D Figurine Mini","3D Collection",119,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate","3dMini.jpeg"],
-  [11,"3D Figurine Small","3D Collection",139,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate","3dSmall.jpeg"],
+  [10,"3D Figurine Mini","3D Collection",119,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate"],
+  [11,"3D Figurine Small","3D Collection",139,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate"],
   [12,"3D Figurine Medium","3D Collection",169,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate"],
-  [13,"3D Figurine Large","3D Collection",219,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport","3dLarge.jpeg"],
-  [14,"3D Figurine X-Large","3D Collection",299,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport","3dXLarge.jpeg"],
-  [15,"3D Cat","3D Collection",39,"Figurine only","3dCat.jpeg"],
-  [16,"3D Husky","3D Collection",49,"Figurine only","3dHusky.jpeg"],
-  [17,"3D Elephant","3D Collection",69,"Figurine only","3dElephant.jpeg"],
-  [18,"3D Sharpei","3D Collection",99,"Figurine only","3dSharpei.jpeg"],
-  [19,"3D Lion","3D Collection",99,"Figurine only","3dLion.jpeg"],
-  [20,"3D Dino","3D Collection",99,"Figurine only","3dDino.jpeg"],
-  [21,"3D Angels","3D Collection",99,"Figurine only","3dAngel1.jpeg"],
-  [22,"3D Fairy on Flower","3D Collection",99,"Figurine only","3dFairy.jpeg"],
-  [23,"3D Gorilla","3D Collection",149,"Figurine only","3dGorilla.jpeg"],
+  [13,"3D Figurine Large","3D Collection",219,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport"],
+  [14,"3D Figurine X-Large","3D Collection",299,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport"],
+  [15,"3D Cat","3D Collection",39,"Figurine only"],
+  [16,"3D Husky","3D Collection",49,"Figurine only"],
+  [17,"3D Elephant","3D Collection",69,"Figurine only"],
+  [18,"3D Sharpei","3D Collection",99,"Figurine only"],
+  [19,"3D Lion","3D Collection",99,"Figurine only"],
+  [20,"3D Dino","3D Collection",99,"Figurine only"],
+  [21,"3D Angels","3D Collection",99,"Figurine only"],
+  [22,"3D Fairy on Flower","3D Collection",99,"Figurine only"],
+  [23,"3D Gorilla","3D Collection",149,"Figurine only"],
   [24,"Blessed Cross Kit","Faith Collection",89,"1 Figurine, 3 Paint pots, 2 Brushes, Mini palette"],
   [25,"Blessed Cross","Faith Collection",49,"Figurine only"],
   [26,"Faith Cross Kit","Faith Collection",89,"1 Figurine, 3 Paint pots, 2 Brushes, Mini palette"],
@@ -252,26 +251,26 @@ const PRODUCTS = [
   [29,"God is Good","Faith Collection",59,"Figurine only"],
   [30,"Angel Girl Kit","Faith Collection",140,"1 Figurine, 4 Paint pots, 2 Brushes, Mini palette"],
   [31,"Angel Girl","Faith Collection",69,"Figurine only"],
-  [32,"2 Piece Faith Box","Faith Collection",179,"2 Faith Figurines (of your choice), 5 Paint pots, 2 Brushes, Mini palette, Passport","faith2.jpeg"],
-  [33,"3 Piece Faith Box","Faith Collection",249,"3 Faith Figurines (of your choice), 6 Paint pots, 2 Brushes, Mini palette, Passport","Faith3.jpeg"],
-  [34,"4 Piece Faith Box","Faith Collection",299,"4 Faith Figurines (of your choice), 8 Paint pots, 2 Brushes, Mini palette, Passport","Faith4.jpeg"],
-  [35,"Personalisation Kit","Letters & Numbers",179,"Personalised name (up to 5 letters), 5 Paint pots, 1 Brush, Mini palette, Passport","LandN.jpeg"],
-  [36,"Single Letter/Number","Letters & Numbers",20,"1 Letter or Number of your choice to be added onto Personalisation Kit"],
+  [32,"2 Piece Faith Box","Faith Collection",179,"2 Faith Figurines (of your choice), 5 Paint pots, 2 Brushes, Mini palette, Passport"],
+  [33,"3 Piece Faith Box","Faith Collection",249,"3 Faith Figurines (of your choice), 6 Paint pots, 2 Brushes, Mini palette, Passport"],
+  [34,"4 Piece Faith Box","Faith Collection",299,"4 Faith Figurines (of your choice), 8 Paint pots, 2 Brushes, Mini palette, Passport"],
+  [35,"Personalisation Kit","Letters & Numbers",179,"Personalised name (up to 5 letters), 5 Paint pots, 1 Brush, Mini palette, Passport"],
+  [36,"Single Letter/Number","Letters & Numbers",20,"1 Letter or Number of your choice"],
   [37,"9 Donut Creative set","Donut Bar",799,"1 Donut stand, 9 Large Donuts, 6 Paint pots, 2 Brushes"],
   [38,"18 Donut Creative set","Donut Bar",1099,"1 Donut stand, 18 Large Donuts, 12 Paint pots, 3 Brushes"],
   [39,"9 Artists Party set","Donut Bar",899,"1 Donut stand, 9 Large Donuts, 27 Paint pots, 9 Brushes"],
   [40,"18 Artists Party set","Donut Bar",1399,"1 Donut stand, 18 Large Donuts, 54 Paint pots, 18 Brushes"],
   [41,"Donut Stand","Donut Bar",499,"Donut stand only"],
   [42,"Donut stand personalisation","Donut Bar",80,"Add a personalised name to your donut stand"],
-  [43,"Sip & Paint Essential","Sip & Paint Boxes",329,"1 Large Canvas, 1 Wooden Easel, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game","SipAndPaint.jpeg"],
+  [43,"Sip & Paint Essential","Sip & Paint Boxes",329,"1 Large Canvas, 1 Wooden Easel, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game"],
   [44,"Sip & Paint Signature","Sip & Paint Boxes",429,"1 Large Canvas, 1 Wooden Easel, 3 Flower Figurines, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box"],
   [45,"Sip & Paint Signature (2 canvases)","Sip & Paint Boxes",499,"2 Large Canvases, 1 Wooden Easel, 3 Flower Figurines, 12 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box, Personalised Tag (optional)"],
-  [46,"Rainbow Artwork Display set","Wall Hanging",399,"Wall hanging display to attach artwork","RainbowDisplay.jpeg","New"],
-  [47,"Mermaid Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips","MermaidHair.jpeg","New"],
-  [48,"Butterfly Hanging Shelf","Wall Hanging",499,"Wall hanging butterfly shelf.","ButterflyShelf.jpeg","New"],
-  [49,"Unicorn Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips","UnicornHair.jpeg","New"],
-  [50,"30 Piece Art & Crafts Set (Pink)","Crafting Kit",899,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots","CompleteKit.jpeg","Hot Seller"],
-  [51,"30 Piece Art & Crafts Set (Blue)","Crafting Kit",899,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots","CompleteKit.jpeg","Hot Seller"],
+  [46,"Rainbow Artwork Display set","Wall Hanging",399,"Wall hanging display to attach artwork"],
+  [47,"Mermaid Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
+  [48,"Butterfly Hanging Shelf","Wall Hanging",499,"Wall hanging butterfly shelf."],
+  [49,"Unicorn Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
+  [50,"30 Piece Art & Crafts Set (Pink)","Crafting Kit",75,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots"],
+  [51,"30 Piece Art & Crafts Set (Blue)","Crafting Kit",75,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots"],
   [52,"Glitter and Gem Decoration Kit","Arts and crafts",75,"Finishing touches for any painted project."]
 ].map(([id, name, category, price, description, image = "", badge = ""]) => ({ id, name, category, price, description, image, badge }));
 
@@ -430,7 +429,6 @@ function openDetail(id) {
     h.setAttribute("aria-pressed", now); h.textContent = now ? "\u2665" : "\u2661";
   };
   $("detail").showModal();
-}
 }
 $("shop").addEventListener("click", e => {
   if (e.target.closest("button, a")) return;
