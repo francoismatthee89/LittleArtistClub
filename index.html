@@ -212,9 +212,17 @@ body:has(dialog[open]) { overflow: hidden; }
    ============================================================ */
 const WHATSAPP_NUMBER = "27662296278";   // country code + number, no plus or spaces
 const CURRENCY = "R";
-const OPTION_IDS = [1, 2, 3];   // products that need a theme chosen (ids from the product list)
 const THEMES = ["Dino","Space","Under the sea","Planes","Christmas","Princess","Race cars","Farming","Number & Letters","Forest animals","Tractors","Unicorns","Highland cows","Safari animals","Owl","Bee","Donuts","Alpacas","Dogs","Cats","Pigs","Enchanted fairy garden","Pineapples","Gaming","Butterfly garden","Bunnies","Flowers","Sweets"];
-
+const LETTERS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].flatMap(c => [c, c.toLowerCase()]).concat([..."1234567890"]);
+// Which products get an options dropdown (id from your product list): label shown + choices
+const OPTION_SETS = {
+  1:  { label: "theme", list: THEMES },
+  2:  { label: "theme", list: THEMES },
+  3:  { label: "theme", list: THEMES },
+  36: { label: "letter or number", list: LETTERS }
+};
+const OPTION_IDS = Object.keys(OPTION_SETS).map(Number);
+  
 // Each product is one line:
 //   [id, "Name", "Category", price, "Description", "photo-file.jpg", "BADGE"]
 // The photo and badge are optional (for example "Best seller" or "New").
@@ -231,7 +239,7 @@ const PRODUCTS = [
   [9,"Special Large","Wooden collection",99,"1 Wooden piece, 3 Paint pots, 1 Brush, Gem stickers, Wool."],
   [10,"3D Figurine Mini","3D Collection",119,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate","3dMini.jpeg"],
   [11,"3D Figurine Small","3D Collection",139,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate","3dSmall.jpeg"],
-  [12,"3D Figurine Medium","3D Collection",169,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate"],
+  [12,"3D Figurine Medium","3D Collection",169,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate","3dMedium.jpeg"],
   [13,"3D Figurine Large","3D Collection",219,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport","3dLarge.jpeg"],
   [14,"3D Figurine X-Large","3D Collection",299,"1 x 3D Figurine, 4 Paint pots, 2 Brushes, Mini Paint palette, Certificate, Passport","3dXLarge.jpeg"],
   [15,"3D Cat","3D Collection",39,"Figurine only","3dCat.jpeg"],
@@ -251,20 +259,20 @@ const PRODUCTS = [
   [33,"3 Piece Faith Box","Faith Collection",249,"3 Faith Figurines (of your choice), 6 Paint pots, 2 Brushes, Mini palette, Passport","Faith3.jpeg"],
   [34,"4 Piece Faith Box","Faith Collection",299,"4 Faith Figurines (of your choice), 8 Paint pots, 2 Brushes, Mini palette, Passport","Faith4.jpeg"],
   [35,"Personalisation Kit","Letters & Numbers",179,"Personalised name (up to 5 letters), 5 Paint pots, 1 Brush, Mini palette, Passport","LandN.jpeg"],
-  [36,"Single Letter/Number","Letters & Numbers",20,"1 Letter or Number of your choice"],
+  [36,"Single Letter/Number","Letters & Numbers",20,"1 Letter or Number of your choice","SingleLetter.jpeg"],
   [37,"9 Donut Creative set","Donut Bar",799,"1 Donut stand, 9 Large Donuts, 6 Paint pots, 2 Brushes","9DonutCreative.jpeg"],
   [38,"18 Donut Creative set","Donut Bar",1099,"1 Donut stand, 18 Large Donuts, 12 Paint pots, 3 Brushes","18DonutCreative.jpeg"],
   [39,"9 Artists Party set","Donut Bar",899,"1 Donut stand, 9 Large Donuts, 27 Paint pots, 9 Brushes","9DonutParty.jpeg"],
   [40,"18 Artists Party set","Donut Bar",1399,"1 Donut stand, 18 Large Donuts, 54 Paint pots, 18 Brushes","18DonutParty.jpeg"],
   [41,"Donut Stand","Donut Bar",499,"Donut stand only","DonutStand.jpeg"],
-  [42,"Donut stand personalisation","Donut Bar",80,"Add a personalised name to your donut stand","donutCustom.jpeg"],
+  [42,"Donut stand personalisation","Donut Bar",80,"Add a personalised name to your donut stand","DonutCustom.jpeg"],
   [43,"Sip & Paint Essential","Sip & Paint Boxes",329,"1 Large Canvas, 1 Wooden Easel, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game"],
   [44,"Sip & Paint Signature","Sip & Paint Boxes",429,"1 Large Canvas, 1 Wooden Easel, 3 Flower Figurines, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box","SipAndPaint.jpeg"],
   [45,"Sip & Paint Signature (2 canvases)","Sip & Paint Boxes",499,"2 Large Canvases, 1 Wooden Easel, 3 Flower Figurines, 12 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box, Personalised Tag (optional)"],
   [46,"Rainbow Artwork Display set","Wall Hanging",399,"Wall hanging display to attach artwork"],
   [47,"Mermaid Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
-  [48,"Butterfly Hanging Shelf","Wall Hanging",499,"Wall hanging butterfly shelf."],
-  [49,"Unicorn Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
+  [48,"Butterfly Hanging Shelf","Wall Hanging",499,"Wall hanging butterfly shelf.","ButterflyShelf.jpeg"],
+  [49,"Unicorn Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips","UnicornHair.jpeg"],
   [50,"30 Piece Art & Crafts Set (Pink or Blue)","Crafting Kit",899,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots","CompleteKit.jpeg"],
   [52,"Glitter and Gem Decoration Kit","Arts and crafts",75,"Finishing touches for any painted project."]
 ].map(([id, name, category, price, description, image = "", badge = ""]) => ({ id, name, category, price, description, image, badge }));
@@ -409,7 +417,7 @@ function openDetail(id) {
       <p class="cat">${p.category}</p>
       <h2 id="detail-title">${p.name}</h2>
       <p class="full">${p.description}</p>
-      ${needsOpt ? `<label class="opt">Choose your theme<select id="detail-opt"><option value="">Select a theme...</option>${THEMES.map(t => `<option>${t}</option>`).join("")}</select></label><p class="opt-err" id="opt-err" hidden>Please choose a theme first.</p>` : ""}
+            ${needsOpt ? `<label class="opt">Choose your ${OPTION_SETS[id].label}<select id="detail-opt"><option value="">Select...</option>${OPTION_SETS[id].list.map(t => `<option>${t}</option>`).join("")}</select></label><p class="opt-err" id="opt-err" hidden>Please choose an option first.</p>` : ""}
       <div class="buy"><span class="price">${money(p.price)}</span><button class="add" id="detail-add">Add to cart</button></div>
     </div>`;
   $("detail-add").onclick = () => {
