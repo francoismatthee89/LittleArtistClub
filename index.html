@@ -119,6 +119,9 @@ body:has(dialog[open]) { overflow: hidden; }
 .dlg-info .full { margin: 0; font-weight: 300; font-size: 1rem; }
 .dlg-info .price { font-size: 1.5rem; }
 .dlg-info .buy { margin-top: auto; }
+.opt { display: flex; flex-direction: column; gap: .35rem; font-weight: 500; font-size: .85rem; }
+.opt select { padding: .65rem .9rem; border: 2px solid #EDB9C2; border-radius: 12px; background: #fff; font: 400 1rem var(--body); color: var(--ink); }
+.opt-err { margin: 0; color: #B3414F; font-weight: 500; font-size: .85rem; }  
 
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
@@ -210,6 +213,8 @@ body:has(dialog[open]) { overflow: hidden; }
    ============================================================ */
 const WHATSAPP_NUMBER = "27662296278";   // country code + number, no plus or spaces
 const CURRENCY = "R";
+const OPTION_IDS = [1, 2, 3];   // products that need a theme chosen (the ids from your product list)
+const THEMES = ["Dino","Space","Under the sea","Planes","Christmas","Princess","Race cars","Farming","Number & Letters","Forest animals","Tractors","Unicorns","Highland cows","Safari animals","Owl","Bee","Donuts","Alpacas","Dogs","Cats","Pigs","Enchanted fairy garden","Pineapples","Gaming","Butterfly garden","Bunnies","Flowers","Sweets"];  
 
 // Each product is one line:
 //   [id, "Name", "Category", price, "Description", "photo-file.jpg", "BADGE"]
@@ -327,7 +332,7 @@ function card(p) {
       <p class="cat">${p.category}</p>
       <h3>${p.name}</h3>
       <p class="desc">${p.description}</p>
-      <div class="buy"><span class="price">${money(p.price)}</span><button class="add" data-id="${p.id}">Add to cart</button></div>
+      <div class="buy"><span class="price">${money(p.price)}</span><button class="add" data-id="${p.id}">${OPTION_IDS.includes(p.id) ? "Options" : "Add to cart"}</button></div>
     </div></article>`;
 }
 
@@ -354,46 +359,45 @@ function renderShop() {
     html = section(activeCategory, PRODUCTS.filter(p => p.category === activeCategory), false);
   }
   $("shop").innerHTML = html;
-  $("shop").querySelectorAll(".add").forEach(b => b.onclick = () => addToCart(Number(b.dataset.id)));
+  $("shop").querySelectorAll(".add").forEach(b => b.onclick = () => { const id = Number(b.dataset.id); OPTION_IDS.includes(id) ? openDetail(id) : addToCart(id); });
   $("shop").querySelectorAll(".heart").forEach(h => h.onclick = () => toggleWish(Number(h.dataset.id)));
   $("shop").querySelectorAll(".more").forEach(b => b.onclick = () => {
     activeCategory = b.dataset.cat; renderFilters(); renderShop(); $("shop").scrollIntoView({ behavior: "smooth" });
   });
 }
 
-function addToCart(id) {
-  const found = cart.find(i => i.id === id);
-  if (found) found.qty++; else cart.push({ id, qty: 1 });
+function addToCart(id, opt = "") {
+  const found = cart.find(i => i.id === id && (i.opt || "") === opt);
+  if (found) found.qty++; else cart.push({ id, opt, qty: 1 });
   renderCart();
   $("panel").classList.add("open");
 }
 
-function changeQty(id, delta) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.qty += delta;
+function changeQty(idx, delta) {
+  if (!cart[idx]) return;
+  cart[idx].qty += delta;
   cart = cart.filter(i => i.qty > 0);
   renderCart();
 }
 
 function renderCart() {
   saveCart();
-  const lines = cart.map(i => ({ ...PRODUCTS.find(p => p.id === i.id), qty: i.qty })).filter(l => l.name);
+  const lines = cart.map((i, idx) => ({ ...PRODUCTS.find(p => p.id === i.id), qty: i.qty, opt: i.opt || "", idx })).filter(l => l.name);
   const total = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
   $("count").textContent = lines.reduce((n, l) => n + l.qty, 0);
   $("total").textContent = money(total);
   $("items").innerHTML = lines.length ? lines.map(l => `
     <div class="line">
-      <div>${l.name}<small>${money(l.price)} each</small></div>
+      <div>${l.name}${l.opt ? ` (${l.opt})` : ""}<small>${money(l.price)} each</small></div>
       <div class="qty">
-        <button onclick="changeQty(${l.id}, -1)" aria-label="Remove one">-</button>
+        <button onclick="changeQty(${l.idx}, -1)" aria-label="Remove one">-</button>
         ${l.qty}
-        <button onclick="changeQty(${l.id}, 1)" aria-label="Add one">+</button>
+        <button onclick="changeQty(${l.idx}, 1)" aria-label="Add one">+</button>
       </div>
     </div>`).join("") : '<p class="empty">Your cart is empty. Add something from the shop.</p>';
   const message = encodeURIComponent(
     "Hi, I would like to order:\n" +
-    lines.map(l => `${l.qty} x ${l.name} (${money(l.price * l.qty)})`).join("\n") +
+    lines.map(l => `${l.qty} x ${l.name}${l.opt ? " - " + l.opt : ""} (${money(l.price * l.qty)})`).join("\n") +
     `\nTotal: ${money(total)}`
   );
   $("checkout").href = lines.length ? `https://wa.me/${WHATSAPP_NUMBER}?text=${message}` : "#";
@@ -403,6 +407,7 @@ function openDetail(id) {
   const p = PRODUCTS.find(x => x.id === id);
   if (!p) return;
   const on = wish.includes(id);
+  const needsOpt = OPTION_IDS.includes(id);
   $("detail-body").innerHTML = `
     <div class="pic">${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span>${p.name}</span>`}${p.badge ? `<em class="badge">${p.badge}</em>` : ""}
       <button class="heart" id="detail-heart" data-id="${id}" aria-pressed="${on}" aria-label="Save ${p.name} to wishlist">${on ? "\u2665" : "\u2661"}</button></div>
@@ -410,15 +415,22 @@ function openDetail(id) {
       <p class="cat">${p.category}</p>
       <h2 id="detail-title">${p.name}</h2>
       <p class="full">${p.description}</p>
+      ${needsOpt ? `<label class="opt">Choose your theme<select id="detail-opt"><option value="">Select a theme...</option>${THEMES.map(t => `<option>${t}</option>`).join("")}</select></label><p class="opt-err" id="opt-err" hidden>Please choose a theme first.</p>` : ""}
       <div class="buy"><span class="price">${money(p.price)}</span><button class="add" id="detail-add">Add to cart</button></div>
     </div>`;
-  $("detail-add").onclick = () => { $("detail").close(); addToCart(id); };
+  $("detail-add").onclick = () => {
+    let opt = "";
+    if (needsOpt) { opt = $("detail-opt").value; if (!opt) { $("opt-err").hidden = false; return; } }
+    $("detail").close();
+    addToCart(id, opt);
+  };
   $("detail-heart").onclick = () => {
     toggleWish(id);
     const h = $("detail-heart"), now = wish.includes(id);
     h.setAttribute("aria-pressed", now); h.textContent = now ? "\u2665" : "\u2661";
   };
   $("detail").showModal();
+}
 }
 $("shop").addEventListener("click", e => {
   if (e.target.closest("button, a")) return;
