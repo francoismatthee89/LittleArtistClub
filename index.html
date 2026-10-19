@@ -63,7 +63,7 @@ button { font: inherit; cursor: pointer; }
 .more { margin-left: auto; background: var(--paper); border: 2px solid var(--blush-deep); border-radius: 999px; padding: .3rem 1rem; font-weight: 500; font-size: .85rem; color: var(--ink); }
 .more:hover { background: var(--blush); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 1rem; }
-.card { background: var(--blush); border: 1px solid var(--blush-deep); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(88,122,98,.12); }
+.card { background: #fff; border: 2px solid #EDB9C2; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(88,122,98,.12); }
 .pic { position: relative; aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 1rem; background: var(--blush-deep); font: 500 1rem var(--heading); text-align: center; }
 .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .badge { position: absolute; top: .6rem; left: .6rem; background: var(--blush); border-radius: 999px; padding: .1rem .7rem; font: 500 .65rem var(--body); font-style: normal; letter-spacing: .15em; text-transform: uppercase; }
@@ -105,7 +105,8 @@ footer { padding: 1.25rem 0; text-align: center; font-weight: 500; font-size: .8
 .card { cursor: pointer; transition: box-shadow .2s; }
 .card:hover { box-shadow: 0 6px 16px rgba(88,122,98,.25); }
 body:has(dialog[open]) { overflow: hidden; }
-.dlg { border: 0; padding: 0; border-radius: 22px; width: min(52rem, 92vw); max-height: 90vh; overflow: auto; background: var(--blush); color: var(--ink); }
+.dlg { border: 2px solid #EDB9C2; padding: 0; border-radius: 22px; width: min(52rem, 92vw); max-height: 90vh; overflow: auto; background: #fff; color: var(--ink); }
+.dlg .pic { background: #fff; }
 .dlg::backdrop { background: rgba(43,58,47,.55); }
 .dlg-body { display: grid; grid-template-columns: 1fr 1fr; }
 .dlg .pic { aspect-ratio: auto; min-height: 22rem; font-size: 1.3rem; }
@@ -259,10 +260,10 @@ const PRODUCTS = [
   [43,"Sip & Paint Essential","Sip & Paint Boxes",329,"1 Large Canvas, 1 Wooden Easel, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game"],
   [44,"Sip & Paint Signature","Sip & Paint Boxes",429,"1 Large Canvas, 1 Wooden Easel, 3 Flower Figurines, 8 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box"],
   [45,"Sip & Paint Signature (2 canvases)","Sip & Paint Boxes",499,"2 Large Canvases, 1 Wooden Easel, 3 Flower Figurines, 12 Paint pots, 2 Brushes, Paint palette, Sip & Paint game, Beautiful Gift Box, Personalised Tag (optional)"],
-  [46,"Rainbow Artwork Display set","Wall Hanging",399,"Wall hanging display to attach artwork"],
-  [47,"Mermaid Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
-  [48,"Butterfly Hanging Shelf","Wall Hanging",499,"Wall hanging butterfly shelf."],
-  [49,"Unicorn Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
+  [46,"Rainbow Artwork Display set","Wall Hanging",399,"Wall hanging display to attach artwork","RainbowDisplay.jpeg","New"],
+  [47,"Mermaid Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips","MermaidHair.jpeg","New"],
+  [48,"Butterfly Hanging Shelf","Wall Hanging",499,"Wall hanging butterfly shelf.","ButterflyShelf.jpeg","New"],
+  [49,"Unicorn Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips","UnicornHair.jpeg","New"],
   [50,"30 Piece Art & Crafts Set (Pink)","Crafting Kit",899,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots","CompleteKit.jpeg","Hot Seller"],
   [51,"30 Piece Art & Crafts Set (Blue)","Crafting Kit",899,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots","CompleteKit.jpeg","Hot Seller"],
   [52,"Glitter and Gem Decoration Kit","Arts and crafts",75,"Finishing touches for any painted project."]
