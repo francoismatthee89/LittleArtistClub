@@ -101,6 +101,23 @@ footer { padding: 1.25rem 0; text-align: center; font-weight: 500; font-size: .8
 .total { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: .75rem; }
 .foot .btn { width: 100%; text-align: center; }
 
+/* Product pop-up */
+.card { cursor: pointer; transition: box-shadow .2s; }
+.card:hover { box-shadow: 0 6px 16px rgba(88,122,98,.25); }
+body:has(dialog[open]) { overflow: hidden; }
+.dlg { border: 0; padding: 0; border-radius: 22px; width: min(52rem, 92vw); max-height: 90vh; overflow: auto; background: var(--blush); color: var(--ink); }
+.dlg::backdrop { background: rgba(43,58,47,.55); }
+.dlg-body { display: grid; grid-template-columns: 1fr 1fr; }
+.dlg .pic { aspect-ratio: auto; min-height: 22rem; font-size: 1.3rem; }
+.dlg .pic img { object-fit: contain; }
+.dlg .heart { top: auto; bottom: .8rem; right: .8rem; }
+.dlg-x { position: absolute; top: .7rem; right: .7rem; z-index: 3; background: #fff; }
+.dlg-info { padding: 2.5rem 1.75rem 1.75rem; display: flex; flex-direction: column; gap: .7rem; }
+.dlg-info h2 { margin: 0; font: 600 1.8rem/1.2 var(--heading); }
+.dlg-info .full { margin: 0; font-weight: 300; font-size: 1rem; }
+.dlg-info .price { font-size: 1.5rem; }
+.dlg-info .buy { margin-top: auto; }
+
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
   .brand b { font-size: 1.15rem; }
@@ -112,6 +129,11 @@ footer { padding: 1.25rem 0; text-align: center; font-weight: 500; font-size: .8
   .grid { grid-template-columns: 1fr; }
   .card { flex-direction: row; }
   .pic { width: 38%; aspect-ratio: auto; min-height: 9rem; flex: none; }
+}
+@media (max-width: 600px) {
+  .dlg-body { grid-template-columns: 1fr; }
+  .dlg .pic { width: 100%; min-height: 15rem; }
+  .dlg-info { padding: 1.25rem; }
 }
 @media (prefers-reduced-motion: reduce) { .panel { transition: none; } html { scroll-behavior: auto; } }
 </style>
@@ -162,6 +184,11 @@ footer { padding: 1.25rem 0; text-align: center; font-weight: 500; font-size: .8
 </section>
 
 <footer><div class="wrap">&copy; 2026 Little Artist Club</div></footer>
+
+<dialog class="dlg" id="detail" aria-labelledby="detail-title">
+  <button class="close dlg-x" id="detail-close" aria-label="Close">&times;</button>
+  <div class="dlg-body" id="detail-body"></div>
+</dialog>
 
 <aside class="panel" id="panel" aria-label="Your cart">
   <header>
@@ -236,8 +263,8 @@ const PRODUCTS = [
   [47,"Mermaid Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
   [48,"Butterfly Hanging Shelf","Wall Hanging",499,"Wall hanging butterfly shelf."],
   [49,"Unicorn Hair Clip Holder","Wall Hanging",399,"Wall hanging display to attach hair clips"],
-  [50,"30 Piece Art & Crafts Set (Pink)","Crafting Kit",899,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots","CompleteKit.jpeg"],
-  [51,"30 Piece Art & Crafts Set (Blue)","Crafting Kit",899,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots","CompleteKit.jpeg"],
+  [50,"30 Piece Art & Crafts Set (Pink)","Crafting Kit",75,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots"],
+  [51,"30 Piece Art & Crafts Set (Blue)","Crafting Kit",75,"1 Canvas, 1 Easel, 1 Apron, 3 Paintable figurines, 3 Brushes, 3 Wooden design pieces, 1 Wooden Wand, 1 gem sticker pack, 1 Certificate, 1 Passport, 1 Colour mixing chart, 1 Palette, 12 Paint pots"],
   [52,"Glitter and Gem Decoration Kit","Arts and crafts",75,"Finishing touches for any painted project."]
 ].map(([id, name, category, price, description, image = "", badge = ""]) => ({ id, name, category, price, description, image, badge }));
 
@@ -292,7 +319,7 @@ function renderFilters() {
 }
 
 function card(p) {
-  return `<article class="card">
+  return `<article class="card" data-id="${p.id}" tabindex="0">
     <div class="pic">${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy">` : `<span>${p.name}</span>`}${p.badge ? `<em class="badge">${p.badge}</em>` : ""}<button class="heart" data-id="${p.id}" aria-pressed="${wish.includes(p.id)}" aria-label="Save ${p.name} to wishlist">${wish.includes(p.id) ? "\u2665" : "\u2661"}</button></div>
     <div class="info">
       <p class="cat">${p.category}</p>
@@ -325,9 +352,9 @@ function renderShop() {
     html = section(activeCategory, PRODUCTS.filter(p => p.category === activeCategory), false);
   }
   $("shop").innerHTML = html;
-  document.querySelectorAll(".add").forEach(b => b.onclick = () => addToCart(Number(b.dataset.id)));
-  document.querySelectorAll(".heart").forEach(h => h.onclick = () => toggleWish(Number(h.dataset.id)));
-  document.querySelectorAll(".more").forEach(b => b.onclick = () => {
+  $("shop").querySelectorAll(".add").forEach(b => b.onclick = () => addToCart(Number(b.dataset.id)));
+  $("shop").querySelectorAll(".heart").forEach(h => h.onclick = () => toggleWish(Number(h.dataset.id)));
+  $("shop").querySelectorAll(".more").forEach(b => b.onclick = () => {
     activeCategory = b.dataset.cat; renderFilters(); renderShop(); $("shop").scrollIntoView({ behavior: "smooth" });
   });
 }
@@ -369,6 +396,38 @@ function renderCart() {
   );
   $("checkout").href = lines.length ? `https://wa.me/${WHATSAPP_NUMBER}?text=${message}` : "#";
 }
+
+function openDetail(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  const on = wish.includes(id);
+  $("detail-body").innerHTML = `
+    <div class="pic">${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span>${p.name}</span>`}${p.badge ? `<em class="badge">${p.badge}</em>` : ""}
+      <button class="heart" id="detail-heart" data-id="${id}" aria-pressed="${on}" aria-label="Save ${p.name} to wishlist">${on ? "\u2665" : "\u2661"}</button></div>
+    <div class="dlg-info">
+      <p class="cat">${p.category}</p>
+      <h2 id="detail-title">${p.name}</h2>
+      <p class="full">${p.description}</p>
+      <div class="buy"><span class="price">${money(p.price)}</span><button class="add" id="detail-add">Add to cart</button></div>
+    </div>`;
+  $("detail-add").onclick = () => { $("detail").close(); addToCart(id); };
+  $("detail-heart").onclick = () => {
+    toggleWish(id);
+    const h = $("detail-heart"), now = wish.includes(id);
+    h.setAttribute("aria-pressed", now); h.textContent = now ? "\u2665" : "\u2661";
+  };
+  $("detail").showModal();
+}
+$("shop").addEventListener("click", e => {
+  if (e.target.closest("button, a")) return;
+  const c = e.target.closest(".card");
+  if (c) openDetail(Number(c.dataset.id));
+});
+$("shop").addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.classList.contains("card")) openDetail(Number(e.target.dataset.id));
+});
+$("detail-close").onclick = () => $("detail").close();
+$("detail").addEventListener("click", e => { if (e.target === $("detail")) $("detail").close(); });
 
 $("open-cart").onclick = () => $("panel").classList.add("open");
 $("close-cart").onclick = () => $("panel").classList.remove("open");
