@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
 <style>
 :root {
   --bg: #E3ECE1;          /* light sage page */
@@ -153,7 +154,7 @@ body:has(dialog[open]) { overflow: hidden; }
   .dlg-info { padding: 1.25rem; }
 }
 @media (prefers-reduced-motion: reduce) { .panel { transition: none; } html { scroll-behavior: auto; } }
-   body { background: var(--bg) url("littleartists-minimal-sage.svg"); background-size: 640px; }
+   body::before { content: ""; position: fixed; inset: 0; z-index: -1; background: url("littleartists-background.svg") center / cover no-repeat; }
 </style>
 </head>
 <body>
