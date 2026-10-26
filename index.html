@@ -123,6 +123,7 @@ body:has(dialog[open]) { overflow: hidden; }
 .opt { display: flex; flex-direction: column; gap: .35rem; font-weight: 500; font-size: .85rem; }
 .opt select { padding: .65rem .9rem; border: 2px solid #EDB9C2; border-radius: 12px; background: #fff; font: 400 1rem var(--body); color: var(--ink); }
 .opt-err { margin: 0; color: #B3414F; font-weight: 500; font-size: .85rem; }
+  
 /* About / Our Story */
 .band .story { max-width: 50rem; }
 .band .story p { max-width: none; margin: 0 0 1rem; font-weight: 300; }
@@ -134,7 +135,18 @@ body:has(dialog[open]) { overflow: hidden; }
 .values { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; margin: 1.5rem 0; }
 .value { background: #fff; border: 2px solid #EDB9C2; border-radius: 16px; padding: 1rem 1.1rem; }
 .value h4 { margin: 0 0 .4rem; font: 600 1.05rem/1.3 var(--heading); }
-.value p { margin: 0 !important; font-size: .92rem; }  
+.value p { margin: 0 !important; font-size: .92rem; }
+  
+/* Checkout form in the cart */
+.foot { max-height: 62%; overflow-y: auto; }
+.checkout-form { display: grid; gap: .5rem; margin-bottom: .75rem; }
+.checkout-form [hidden] { display: none !important; }
+.checkout-form label { display: flex; flex-direction: column; gap: .25rem; font-weight: 500; font-size: .8rem; }
+.checkout-form input, .checkout-form select { width: 100%; padding: .55rem .75rem; border: 2px solid #EDB9C2; border-radius: 12px; background: #fff; font: 400 .9rem var(--body); color: var(--ink); }
+#addr-only { display: grid; gap: .5rem; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.ship-row { display: flex; justify-content: space-between; font-size: .9rem; margin-bottom: .35rem; }
+.note { margin: 0; font-size: .78rem; font-weight: 300; color: var(--muted); }  
 
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
@@ -251,8 +263,22 @@ body:has(dialog[open]) { overflow: hidden; }
     <button class="close" id="close-cart" aria-label="Close cart">&times;</button>
   </header>
   <div class="items" id="items"></div>
-  <div class="foot">
+    <div class="foot">
+    <div class="checkout-form">
+      <label>Delivery <select id="delivery"></select></label>
+      <input id="c-name" placeholder="Your name" autocomplete="name">
+      <input id="c-phone" placeholder="Cell number" autocomplete="tel" inputmode="tel">
+      <div id="addr-only">
+        <input id="c-street" placeholder="Street address" autocomplete="street-address">
+        <div class="row2"><input id="c-suburb" placeholder="Suburb"><input id="c-city" placeholder="City"></div>
+        <input id="c-code" placeholder="Postal code" inputmode="numeric" autocomplete="postal-code">
+      </div>
+      <label>Payment <select id="payment"></select></label>
+      <p class="note" id="pay-note"></p>
+    </div>
+    <div class="ship-row"><span>Delivery</span><span id="ship">-</span></div>
     <div class="total"><span>Total</span><span id="total">R0</span></div>
+    <p class="opt-err" id="form-err" hidden></p>
     <a class="btn" id="checkout" href="#">Send order on WhatsApp</a>
   </div>
 </aside>
@@ -274,6 +300,16 @@ const OPTION_SETS = {
   50: { label: "colour", list: ["Pink", "Blue"] }
 };
 const OPTION_IDS = Object.keys(OPTION_SETS).map(Number);
+
+// Delivery choices. fee: a number (0 = free, 99 = R99) is added to the total; null = "quoted after you order".
+const DELIVERY = [
+  { id: "courier", label: "The Courier Guy - door-to-door", fee: null, address: true },
+  { id: "collect", label: "Collection (we will arrange a time)", fee: 0, address: false }
+];
+// Payment choices shown in the cart
+const PAYMENTS = [
+  { label: "Yoco - secure card payment", note: "After you send your order we will reply with a secure Yoco payment link for the exact total." }
+];
   
 // Each product is one line:
 //   [id, "Name", "Category", price, "Description", "photo-file.jpg", "BADGE"]
@@ -340,8 +376,7 @@ const PRODUCTS = [
   [63,"Gem Stickers","Extras",5,"1 Sheet of Gem stickers","ExtraGems.jpeg"],
   [64,"Colour Mixing Chart","Extras",50,"1 Colour Mixing Chart","ExtraChart.jpeg"],
   [65,"Little Artist Club Certificate","Extras",50,"1 Little Artist Club Certificate","ExtraCertificate.jpeg"],
-  [66,"Little Artist Club Passport","Extras",85,"1 Little Artist Club Passport","ExtraPassport.jpeg"],
-  [52,"Glitter and Gem Decoration Kit","Arts and crafts",75,"Finishing touches for any painted project."]
+  [66,"Little Artist Club Passport","Extras",85,"1 Little Artist Club Passport","ExtraPassport.jpeg"]
 ].map(([id, name, category, price, description, image = "", badge = ""]) => ({ id, name, category, price, description, image, badge }));
 
 // Icon and short line shown for each category
@@ -354,8 +389,7 @@ const CATS = {
   "Donut Bar":         ["\u{1F369}", "Party-ready painting fun."],
   "Sip & Paint Boxes": ["\u{1F377}", "Relax, sip and create."],
   "Wall Hanging":      ["\u{1F5BC}\uFE0F", "Show off their artwork."],
-  "Crafting Kit":      ["\u2702\uFE0F",    "Everything in one box."],
-  "Arts and crafts":   ["\u{1F308}", "Finishing touches."]
+  "Crafting Kit":      ["\u2702\uFE0F",    "Everything in one box."]
 };
 
 /* ============================================================
@@ -449,12 +483,14 @@ function changeQty(idx, delta) {
   renderCart();
 }
 
+function cartLines() {
+  return cart.map((i, idx) => ({ ...PRODUCTS.find(p => p.id === i.id), qty: i.qty, opt: i.opt || "", idx })).filter(l => l.name);
+}
+
 function renderCart() {
   saveCart();
-  const lines = cart.map((i, idx) => ({ ...PRODUCTS.find(p => p.id === i.id), qty: i.qty, opt: i.opt || "", idx })).filter(l => l.name);
-  const total = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
+  const lines = cartLines();
   $("count").textContent = lines.reduce((n, l) => n + l.qty, 0);
-  $("total").textContent = money(total);
   $("items").innerHTML = lines.length ? lines.map(l => `
     <div class="line">
       <div>${l.name}${l.opt ? ` (${l.opt})` : ""}<small>${money(l.price)} each</small></div>
@@ -464,12 +500,56 @@ function renderCart() {
         <button onclick="changeQty(${l.idx}, 1)" aria-label="Add one">+</button>
       </div>
     </div>`).join("") : '<p class="empty">Your cart is empty. Add something from the shop.</p>';
+  updateCheckout();
+}
+
+function currentDelivery() { return DELIVERY.find(d => d.id === $("delivery").value) || DELIVERY[0]; }
+
+function updateCheckout() {
+  const lines = cartLines();
+  const d = currentDelivery(), pay = PAYMENTS[Number($("payment").value)] || PAYMENTS[0];
+  $("addr-only").hidden = !d.address;
+  $("pay-note").textContent = pay.note;
+  const subtotal = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
+  const fee = typeof d.fee === "number" ? d.fee : 0;
+  const feeText = d.fee === null ? "Quoted after you order" : d.fee === 0 ? "Free" : money(d.fee);
+  const total = subtotal + (lines.length ? fee : 0);
+  const plus = d.fee === null && lines.length ? " + delivery" : "";
+  $("ship").textContent = lines.length ? feeText : "-";
+  $("total").textContent = money(total) + plus;
+  const v = id => $(id).value.trim();
+  const addr = d.address ? [v("c-street"), v("c-suburb"), v("c-city"), v("c-code")].filter(Boolean).join(", ") : "";
   const message = encodeURIComponent(
     "Hi, I would like to order:\n" +
     lines.map(l => `${l.qty} x ${l.name}${l.opt ? " - " + l.opt : ""} (${money(l.price * l.qty)})`).join("\n") +
-    `\nTotal: ${money(total)}`
+    `\nSubtotal: ${money(subtotal)}` +
+    `\nDelivery: ${d.label} (${feeText})` +
+    `\nTotal: ${money(total)}${plus}` +
+    `\nPayment: ${pay.label}` +
+    `\n\nName: ${v("c-name")}\nCell: ${v("c-phone")}` + (addr ? `\nAddress: ${addr}` : "")
   );
   $("checkout").href = lines.length ? `https://wa.me/${WHATSAPP_NUMBER}?text=${message}` : "#";
+}
+
+function checkoutError() {
+  if (!cartLines().length) return "Your cart is empty.";
+  if (!$("c-name").value.trim() || !$("c-phone").value.trim()) return "Please enter your name and cell number.";
+  if (currentDelivery().address && (!$("c-street").value.trim() || !$("c-city").value.trim() || !$("c-code").value.trim())) return "Please complete your delivery address.";
+  return "";
+}
+
+function initCheckout() {
+  $("delivery").innerHTML = DELIVERY.map(d => `<option value="${d.id}">${d.label}</option>`).join("");
+  $("payment").innerHTML = PAYMENTS.map((p, i) => `<option value="${i}">${p.label}</option>`).join("");
+  ["delivery", "payment", "c-name", "c-phone", "c-street", "c-suburb", "c-city", "c-code"].forEach(id => {
+    $(id).addEventListener("input", updateCheckout);
+    $(id).addEventListener("change", updateCheckout);
+  });
+  $("checkout").addEventListener("click", e => {
+    const err = checkoutError();
+    $("form-err").hidden = !err; $("form-err").textContent = err;
+    if (err) e.preventDefault();
+  });
 }
 
 function openDetail(id) {
@@ -517,6 +597,7 @@ $("search").oninput = renderShop;
 
 renderFilters();
 renderShop();
+initCheckout();
 renderCart();
 </script>
 </body>
