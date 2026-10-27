@@ -148,6 +148,13 @@ body:has(dialog[open]) { overflow: hidden; }
 .ship-row { display: flex; justify-content: space-between; font-size: .9rem; margin-bottom: .35rem; }
 .note { margin: 0; font-size: .78rem; font-weight: 300; color: var(--muted); }  
 
+/* Pay now + thank-you banner */
+.pay { width: 100%; margin-bottom: .5rem; text-align: center; }
+.pay:disabled { opacity: .6; cursor: wait; }
+.paid { background: var(--blush); border-bottom: 3px solid #EDB9C2; padding: .9rem 1.25rem; text-align: center; font-weight: 500; }
+.paid[hidden] { display: none; }
+.paid .btn { margin: .5rem 0 0 .5rem; }  
+
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
   .brand b { font-size: 1.15rem; }
@@ -181,6 +188,7 @@ body:has(dialog[open]) { overflow: hidden; }
   </div>
 </header>
 
+  <div class="paid" id="paid-banner" hidden></div>
 <main id="top" class="wrap">
   <div class="search"><input id="search" type="search" placeholder="Search products..." aria-label="Search products"></div>
   <nav class="filters" id="filters" aria-label="Categories"></nav>
@@ -279,6 +287,7 @@ body:has(dialog[open]) { overflow: hidden; }
     <div class="ship-row"><span>Delivery</span><span id="ship">-</span></div>
     <div class="total"><span>Total</span><span id="total">R0</span></div>
     <p class="opt-err" id="form-err" hidden></p>
+    <button class="btn pay" id="pay-yoco" type="button" hidden>Pay now with Yoco</button>
     <a class="btn" id="checkout" href="#">Send order on WhatsApp</a>
   </div>
 </aside>
@@ -310,6 +319,8 @@ const DELIVERY = [
 const PAYMENTS = [
   { label: "Yoco - secure card payment", note: "After you send your order we will reply with a secure Yoco payment link for the exact total." }
 ];
+// Paste the address of your Cloudflare Worker here to switch on "Pay now with Yoco" (leave "" to keep WhatsApp only)
+const CHECKOUT_URL = "lac-checkout.francoismatthee89.workers.dev";
   
 // Each product is one line:
 //   [id, "Name", "Category", price, "Description", "photo-file.jpg", "BADGE"]
@@ -505,37 +516,90 @@ function renderCart() {
 
 function currentDelivery() { return DELIVERY.find(d => d.id === $("delivery").value) || DELIVERY[0]; }
 
-function updateCheckout() {
-  const lines = cartLines();
-  const d = currentDelivery(), pay = PAYMENTS[Number($("payment").value)] || PAYMENTS[0];
-  $("addr-only").hidden = !d.address;
-  $("pay-note").textContent = pay.note;
-  const subtotal = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
-  const fee = typeof d.fee === "number" ? d.fee : 0;
-  const feeText = d.fee === null ? "Quoted after you order" : d.fee === 0 ? "Free" : money(d.fee);
-  const total = subtotal + (lines.length ? fee : 0);
-  const plus = d.fee === null && lines.length ? " + delivery" : "";
-  $("ship").textContent = lines.length ? feeText : "-";
-  $("total").textContent = money(total) + plus;
-  const v = id => $(id).value.trim();
-  const addr = d.address ? [v("c-street"), v("c-suburb"), v("c-city"), v("c-code")].filter(Boolean).join(", ") : "";
-  const message = encodeURIComponent(
-    "Hi, I would like to order:\n" +
-    lines.map(l => `${l.qty} x ${l.name}${l.opt ? " - " + l.opt : ""} (${money(l.price * l.qty)})`).join("\n") +
-    `\nSubtotal: ${money(subtotal)}` +
-    `\nDelivery: ${d.label} (${feeText})` +
-    `\nTotal: ${money(total)}${plus}` +
-    `\nPayment: ${pay.label}` +
-    `\n\nName: ${v("c-name")}\nCell: ${v("c-phone")}` + (addr ? `\nAddress: ${addr}` : "")
-  );
-  $("checkout").href = lines.length ? `https://wa.me/${WHATSAPP_NUMBER}?text=${message}` : "#";
-}
+
 
 function checkoutError() {
   if (!cartLines().length) return "Your cart is empty.";
   if (!$("c-name").value.trim() || !$("c-phone").value.trim()) return "Please enter your name and cell number.";
   if (currentDelivery().address && (!$("c-street").value.trim() || !$("c-city").value.trim() || !$("c-code").value.trim())) return "Please complete your delivery address.";
   return "";
+}
+
+function cartTotals() {
+  const lines = cartLines();
+  const d = currentDelivery();
+  const subtotal = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
+  const fee = typeof d.fee === "number" ? d.fee : 0;
+  const feeText = d.fee === null ? "Quoted after you order" : d.fee === 0 ? "Free" : money(d.fee);
+  const total = subtotal + (lines.length ? fee : 0);
+  const plus = d.fee === null && lines.length ? " + delivery" : "";
+  return { lines, d, subtotal, feeText, total, plus };
+}
+
+function orderText(paymentText, ref) {
+  const { lines, d, subtotal, feeText, total, plus } = cartTotals();
+  const v = id => $(id).value.trim();
+  const addr = d.address ? [v("c-street"), v("c-suburb"), v("c-city"), v("c-code")].filter(Boolean).join(", ") : "";
+  return "Hi, I would like to order:\n" +
+    lines.map(l => `${l.qty} x ${l.name}${l.opt ? " - " + l.opt : ""} (${money(l.price * l.qty)})`).join("\n") +
+    `\nSubtotal: ${money(subtotal)}` +
+    `\nDelivery: ${d.label} (${feeText})` +
+    `\nTotal: ${money(total)}${plus}` +
+    `\nPayment: ${paymentText}` + (ref ? `\nOrder ref: ${ref}` : "") +
+    `\n\nName: ${v("c-name")}\nCell: ${v("c-phone")}` + (addr ? `\nAddress: ${addr}` : "");
+}
+
+function updateCheckout() {
+  const { lines, d, feeText, total, plus } = cartTotals();
+  const pay = PAYMENTS[Number($("payment").value)] || PAYMENTS[0];
+  $("addr-only").hidden = !d.address;
+  $("pay-note").textContent = pay.note;
+  $("ship").textContent = lines.length ? feeText : "-";
+  $("total").textContent = money(total) + plus;
+  $("pay-yoco").hidden = !(CHECKOUT_URL && lines.length && typeof d.fee === "number");
+  $("checkout").href = lines.length ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(orderText(pay.label))}` : "#";
+}
+
+async function payWithYoco() {
+  const err = checkoutError();
+  $("form-err").hidden = !err; $("form-err").textContent = err;
+  if (err) return;
+  const btn = $("pay-yoco");
+  btn.disabled = true; btn.textContent = "Taking you to Yoco...";
+  try {
+    const res = await fetch(CHECKOUT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: cartLines().map(l => ({ id: l.id, qty: l.qty })),
+        delivery: currentDelivery().id,
+        name: $("c-name").value.trim(),
+        phone: $("c-phone").value.trim()
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.redirectUrl) throw new Error(data.error || "Payment could not be started");
+    try { localStorage.setItem("lastOrder", orderText("Paid online with Yoco", data.orderRef)); } catch (e) {}
+    window.location.href = data.redirectUrl;
+  } catch (e) {
+    $("form-err").hidden = false;
+    $("form-err").textContent = "Sorry, we could not start the payment. Please send your order on WhatsApp instead.";
+    btn.disabled = false; btn.textContent = "Pay now with Yoco";
+  }
+}
+
+function showPayResult() {
+  const p = new URLSearchParams(location.search), b = $("paid-banner");
+  let last = ""; try { last = localStorage.getItem("lastOrder") || ""; } catch (e) {}
+  if (p.has("paid")) {
+    cart = []; renderCart();
+    b.innerHTML = "<strong>Thank you! &#9825;</strong> Your payment is being confirmed. Please send us your order details so we can start packing." +
+      (last ? ` <a class="btn" href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(last)}">Send order details on WhatsApp</a>` : "");
+  } else if (p.has("cancelled") || p.has("failed")) {
+    b.textContent = p.has("failed") ? "Your payment did not go through. Your cart is saved, so you can try again." : "Payment cancelled. Your cart is saved for whenever you are ready.";
+  } else return;
+  b.hidden = false;
+  history.replaceState(null, "", location.pathname);
 }
 
 function initCheckout() {
@@ -545,6 +609,7 @@ function initCheckout() {
     $(id).addEventListener("input", updateCheckout);
     $(id).addEventListener("change", updateCheckout);
   });
+  $("pay-yoco").addEventListener("click", payWithYoco);
   $("checkout").addEventListener("click", e => {
     const err = checkoutError();
     $("form-err").hidden = !err; $("form-err").textContent = err;
@@ -596,9 +661,9 @@ $("close-cart").onclick = () => $("panel").classList.remove("open");
 $("search").oninput = renderShop;
 
 renderFilters();
-renderShop();
 initCheckout();
 renderCart();
+showPayResult();
 </script>
 </body>
 </html>
