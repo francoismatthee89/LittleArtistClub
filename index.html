@@ -407,7 +407,7 @@ const CATS = {
    SHOP CODE (you do not need to change anything below)
    ============================================================ */
 const $ = (id) => document.getElementById(id);
-const money = (n) => CURRENCY + n.toLocaleString("en-ZA");
+const money = (n) => typeof n === "number" ? CURRENCY + n.toLocaleString("en-ZA") : "Price on request";
 const cats = [...new Set(PRODUCTS.map(p => p.category))];
 let cart = [];
 let activeCategory = "All";
@@ -446,7 +446,7 @@ function card(p) {
       <p class="cat">${p.category}</p>
       <h3>${p.name}</h3>
       <p class="desc">${p.description}</p>
-      <div class="buy"><span class="price">${money(p.price)}</span><button class="add" data-id="${p.id}">${OPTION_IDS.includes(p.id) ? "Options" : "Add to cart"}</button></div>
+      <div class="buy"><span class="price">${money(p.price)}</span><button class="add" data-id="${p.id}">   ${typeof p.price !== "number" ? "Enquire" : OPTION_IDS.includes(p.id) ? "Options" : "Add to cart"}
     </div></article>`;
 }
 
@@ -481,6 +481,8 @@ function renderShop() {
 }
 
 function addToCart(id, opt = "") {
+  const prod = PRODUCTS.find(p => p.id === id);
+  if (prod && typeof prod.price !== "number") { window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi, I would like a quote for: " + prod.name)}`, "_blank"); return; }
   const found = cart.find(i => i.id === id && (i.opt || "") === opt);
   if (found) found.qty++; else cart.push({ id, opt, qty: 1 });
   renderCart();
