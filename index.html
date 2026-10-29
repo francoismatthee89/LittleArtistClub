@@ -276,20 +276,17 @@ body:has(dialog[open]) { overflow: hidden; }
       <label>Delivery <select id="delivery"></select></label>
       <input id="c-name" placeholder="Your name" autocomplete="name">
       <input id="c-phone" placeholder="Cell number" autocomplete="tel" inputmode="tel">
-      <div id="addr-only">
+           <div id="addr-only">
         <input id="c-street" placeholder="Street address" autocomplete="street-address">
         <div class="row2"><input id="c-suburb" placeholder="Suburb"><input id="c-city" placeholder="City"></div>
         <input id="c-code" placeholder="Postal code" inputmode="numeric" autocomplete="postal-code">
+        <select id="c-province" aria-label="Province" autocomplete="address-level1">
+          <option value="">Province</option>
+          <option>Eastern Cape</option><option>Free State</option><option>Gauteng</option><option>KwaZulu-Natal</option>
+          <option>Limpopo</option><option>Mpumalanga</option><option>North West</option><option>Northern Cape</option><option>Western Cape</option>
+        </select>
       </div>
-      <label>Payment <select id="payment"></select></label>
-      <p class="note" id="pay-note"></p>
-    </div>
-    <div class="ship-row"><span>Delivery</span><span id="ship">-</span></div>
-    <div class="total"><span>Total</span><span id="total">R0</span></div>
-    <p class="opt-err" id="form-err" hidden></p>
-    <button class="btn pay" id="pay-yoco" type="button" hidden>Pay now with Yoco</button>
-    <a class="btn" id="checkout" href="#">Send order on WhatsApp</a>
-  </div>
+      <button class="btn pay" id="get-rate" type="button" hidden>Get delivery price</button>
 </aside>
 
 <script>
@@ -312,7 +309,7 @@ const OPTION_IDS = Object.keys(OPTION_SETS).map(Number);
 
 // Delivery choices. fee: a number (0 = free, 99 = R99) is added to the total; null = "quoted after you order".
 const DELIVERY = [
-  { id: "courier", label: "The Courier Guy - door-to-door", fee: null, address: true },
+  { id: "courier", label: "The Courier Guy - door-to-door", fee: "live", address: true },
   { id: "collect", label: "Collection (we will arrange a time)", fee: 0, address: false }
 ];
 // Payment choices shown in the cart
@@ -407,7 +404,7 @@ const CATS = {
    SHOP CODE (you do not need to change anything below)
    ============================================================ */
 const $ = (id) => document.getElementById(id);
-const money = (n) => typeof n === "number" ? CURRENCY + n.toLocaleString("en-ZA") : "Price on request";
+const money = (n) => typeof n !== "number" ? "Price on request" : CURRENCY + (Number.isInteger(n) ? n.toLocaleString("en-ZA") : n.toFixed(2));
 const cats = [...new Set(PRODUCTS.map(p => p.category))];
 let cart = [];
 let activeCategory = "All";
@@ -518,12 +515,20 @@ function renderCart() {
 
 function currentDelivery() { return DELIVERY.find(d => d.id === $("delivery").value) || DELIVERY[0]; }
 
+let quote = null; // the last delivery price from The Courier Guy: { key, price, code, name }
 
+function addressObj() {
+  const v = id => $(id).value.trim();
+  return { street: v("c-street"), suburb: v("c-suburb"), city: v("c-city"), province: v("c-province"), code: v("c-code") };
+}
+function quoteKey() { return JSON.stringify([cartLines().map(l => [l.id, l.qty]), addressObj()]); }
+function validQuote() { return !!quote && quote.key === quoteKey(); }
 
 function checkoutError() {
   if (!cartLines().length) return "Your cart is empty.";
   if (!$("c-name").value.trim() || !$("c-phone").value.trim()) return "Please enter your name and cell number.";
-  if (currentDelivery().address && (!$("c-street").value.trim() || !$("c-city").value.trim() || !$("c-code").value.trim())) return "Please complete your delivery address.";
+  const a = addressObj();
+  if (currentDelivery().address && (!a.street || !a.suburb || !a.city || !a.province || !a.code)) return "Please complete your delivery address, including the province.";
   return "";
 }
 
@@ -531,17 +536,22 @@ function cartTotals() {
   const lines = cartLines();
   const d = currentDelivery();
   const subtotal = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
-  const fee = typeof d.fee === "number" ? d.fee : 0;
-  const feeText = d.fee === null ? "Quoted after you order" : d.fee === 0 ? "Free" : money(d.fee);
-  const total = subtotal + (lines.length ? fee : 0);
-  const plus = d.fee === null && lines.length ? " + delivery" : "";
-  return { lines, d, subtotal, feeText, total, plus };
+  let fee = 0, feeText, known = true;
+  if (d.fee === "live") {
+    if (validQuote()) { fee = quote.price; feeText = money(fee); }
+    else { known = false; feeText = "Tap Get delivery price"; }
+  } else if (d.fee === null) { known = false; feeText = "Quoted after you order"; }
+  else { fee = d.fee; feeText = fee === 0 ? "Free" : money(fee); }
+  const total = Math.round((subtotal + (lines.length ? fee : 0)) * 100) / 100;
+  const plus = !known && lines.length ? " + delivery" : "";
+  return { lines, d, subtotal, fee, feeText, known, total, plus };
 }
 
 function orderText(paymentText, ref) {
   const { lines, d, subtotal, feeText, total, plus } = cartTotals();
   const v = id => $(id).value.trim();
-  const addr = d.address ? [v("c-street"), v("c-suburb"), v("c-city"), v("c-code")].filter(Boolean).join(", ") : "";
+  const a = addressObj();
+  const addr = d.address ? [a.street, a.suburb, a.city, a.province, a.code].filter(Boolean).join(", ") : "";
   return "Hi, I would like to order:\n" +
     lines.map(l => `${l.qty} x ${l.name}${l.opt ? " - " + l.opt : ""} (${money(l.price * l.qty)})`).join("\n") +
     `\nSubtotal: ${money(subtotal)}` +
@@ -552,20 +562,52 @@ function orderText(paymentText, ref) {
 }
 
 function updateCheckout() {
-  const { lines, d, feeText, total, plus } = cartTotals();
+  const { lines, d, feeText, known, total, plus } = cartTotals();
   const pay = PAYMENTS[Number($("payment").value)] || PAYMENTS[0];
   $("addr-only").hidden = !d.address;
+  $("get-rate").hidden = !(CHECKOUT_URL && d.fee === "live" && lines.length);
   $("pay-note").textContent = pay.note;
   $("ship").textContent = lines.length ? feeText : "-";
   $("total").textContent = money(total) + plus;
-  $("pay-yoco").hidden = !(CHECKOUT_URL && lines.length && typeof d.fee === "number");
+  $("pay-yoco").hidden = !(CHECKOUT_URL && lines.length && known);
   $("checkout").href = lines.length ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(orderText(pay.label))}` : "#";
+}
+
+async function getDeliveryPrice() {
+  const a = addressObj(), err = $("form-err"), btn = $("get-rate");
+  if (!a.street || !a.suburb || !a.city || !a.province || !a.code) {
+    err.hidden = false; err.textContent = "Please complete your delivery address, including the province, first.";
+    return;
+  }
+  err.hidden = true;
+  btn.disabled = true; btn.textContent = "Checking The Courier Guy...";
+  try {
+    const res = await fetch(CHECKOUT_URL.replace(/\/$/, "") + "/rates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: cartLines().map(l => ({ id: l.id, qty: l.qty })), address: a })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.options || !data.options.length) throw new Error(data.error || "No delivery options found");
+    const best = data.options[0]; // cheapest
+    quote = { key: quoteKey(), price: best.price, code: best.code, name: best.name };
+  } catch (e) {
+    quote = null;
+    err.hidden = false;
+    err.textContent = "Sorry, we could not get a delivery price (" + e.message + "). You can send your order on WhatsApp and we will quote you.";
+  }
+  btn.disabled = false; btn.textContent = "Get delivery price";
+  updateCheckout();
 }
 
 async function payWithYoco() {
   const err = checkoutError();
   $("form-err").hidden = !err; $("form-err").textContent = err;
   if (err) return;
+  if (currentDelivery().fee === "live" && !validQuote()) {
+    $("form-err").hidden = false; $("form-err").textContent = "Please tap Get delivery price first.";
+    return;
+  }
   const btn = $("pay-yoco");
   btn.disabled = true; btn.textContent = "Taking you to Yoco...";
   try {
@@ -575,6 +617,9 @@ async function payWithYoco() {
       body: JSON.stringify({
         items: cartLines().map(l => ({ id: l.id, qty: l.qty })),
         delivery: currentDelivery().id,
+        address: addressObj(),
+        expectedTotal: cartTotals().total,
+        summary: orderText("Paid online with Yoco"),
         name: $("c-name").value.trim(),
         phone: $("c-phone").value.trim()
       })
@@ -585,7 +630,7 @@ async function payWithYoco() {
     window.location.href = data.redirectUrl;
   } catch (e) {
     $("form-err").hidden = false;
-    $("form-err").textContent = "Sorry, we could not start the payment. Please send your order on WhatsApp instead.";
+    $("form-err").textContent = "Sorry, we could not start the payment (" + e.message + "). Please send your order on WhatsApp instead.";
     btn.disabled = false; btn.textContent = "Pay now with Yoco";
   }
 }
@@ -607,10 +652,11 @@ function showPayResult() {
 function initCheckout() {
   $("delivery").innerHTML = DELIVERY.map(d => `<option value="${d.id}">${d.label}</option>`).join("");
   $("payment").innerHTML = PAYMENTS.map((p, i) => `<option value="${i}">${p.label}</option>`).join("");
-  ["delivery", "payment", "c-name", "c-phone", "c-street", "c-suburb", "c-city", "c-code"].forEach(id => {
+  ["delivery", "payment", "c-name", "c-phone", "c-street", "c-suburb", "c-city", "c-province", "c-code"].forEach(id => {
     $(id).addEventListener("input", updateCheckout);
     $(id).addEventListener("change", updateCheckout);
   });
+  $("get-rate").addEventListener("click", getDeliveryPrice);
   $("pay-yoco").addEventListener("click", payWithYoco);
   $("checkout").addEventListener("click", e => {
     const err = checkoutError();
