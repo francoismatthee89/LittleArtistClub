@@ -271,12 +271,12 @@ body:has(dialog[open]) { overflow: hidden; }
     <button class="close" id="close-cart" aria-label="Close cart">&times;</button>
   </header>
   <div class="items" id="items"></div>
-    <div class="foot">
+      <div class="foot">
     <div class="checkout-form">
       <label>Delivery <select id="delivery"></select></label>
       <input id="c-name" placeholder="Your name" autocomplete="name">
       <input id="c-phone" placeholder="Cell number" autocomplete="tel" inputmode="tel">
-           <div id="addr-only">
+      <div id="addr-only">
         <input id="c-street" placeholder="Street address" autocomplete="street-address">
         <div class="row2"><input id="c-suburb" placeholder="Suburb"><input id="c-city" placeholder="City"></div>
         <input id="c-code" placeholder="Postal code" inputmode="numeric" autocomplete="postal-code">
@@ -287,6 +287,15 @@ body:has(dialog[open]) { overflow: hidden; }
         </select>
       </div>
       <button class="btn pay" id="get-rate" type="button" hidden>Get delivery price</button>
+      <label>Payment <select id="payment"></select></label>
+      <p class="note" id="pay-note"></p>
+    </div>
+    <div class="ship-row"><span>Delivery</span><span id="ship">-</span></div>
+    <div class="total"><span>Total</span><span id="total">R0</span></div>
+    <p class="opt-err" id="form-err" hidden></p>
+    <button class="btn pay" id="pay-yoco" type="button" hidden>Pay now with Yoco</button>
+    <a class="btn" id="checkout" href="#">Send order on WhatsApp</a>
+  </div>
 </aside>
 
 <script>
