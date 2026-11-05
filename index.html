@@ -290,6 +290,7 @@ body:has(dialog[open]) { overflow: hidden; }
       <button class="btn pay" id="get-rate" type="button" hidden>Get delivery price</button>
       <label>Payment <select id="payment"></select></label>
       <p class="note" id="pay-note"></p>
+      <p class="note">Please allow 3-4 working days to prepare your order. Personalised orders may take a little longer. Courier delivery time is extra.</p>
     </div>
     <div class="ship-row"><span>Delivery</span><span id="ship">-</span></div>
     <div class="total"><span>Total</span><span id="total">R0</span></div>
@@ -650,7 +651,7 @@ function showPayResult() {
   let last = ""; try { last = localStorage.getItem("lastOrder") || ""; } catch (e) {}
   if (p.has("paid")) {
     cart = []; renderCart();
-    b.innerHTML = "<strong>Thank you! &#9825;</strong> Your payment is being confirmed. Please send us your order details so we can start packing." +
+    b.innerHTML = "<strong>Thank you! &#9825;</strong> Your payment is being confirmed. Please allow 3-4 working days for us to prepare your order (personalised orders may take a little longer) before the courier collects it. Please send us your order details so we can start packing." +
       (last ? ` <a class="btn" href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(last)}">Send order details on WhatsApp</a>` : "");
   } else if (p.has("cancelled") || p.has("failed")) {
     b.textContent = p.has("failed") ? "Your payment did not go through. Your cart is saved, so you can try again." : "Payment cancelled. Your cart is saved for whenever you are ready.";
