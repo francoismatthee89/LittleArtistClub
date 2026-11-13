@@ -154,7 +154,12 @@ body:has(dialog[open]) { overflow: hidden; }
 .paid { background: var(--blush); border-bottom: 3px solid #EDB9C2; padding: .9rem 1.25rem; text-align: center; font-weight: 500; }
 .paid[hidden] { display: none; }
 .paid .btn { margin: .5rem 0 0 .5rem; }  
-.pay[hidden], .foot [hidden] { display: none !important; }  
+.pay[hidden], .foot [hidden] { display: none !important; }
+  
+/* Party packages */
+.dlg-info .full { white-space: pre-line; }
+.opt input { padding: .65rem .9rem; border: 2px solid #EDB9C2; border-radius: 12px; background: #fff; font: 400 1rem var(--body); color: var(--ink); }
+.party-fields { display: grid; gap: .6rem; }  
 
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
@@ -316,7 +321,20 @@ const OPTION_SETS = {
   36: { label: "letter or number", list: LETTERS },
   50: { label: "colour", list: ["Pink", "Blue"] }
 };
-const OPTION_IDS = Object.keys(OPTION_SETS).map(Number);
+  
+// Creative Party Packages: product id -> price for each number of children (keep in step with the Worker)
+const PARTY_SIZES = [10, 15, 20, 25, 30];
+const PARTY_TREATS = 60;   // Rand per child for the party treats add-on
+const PARTY_MIN_DAYS = 7;  // earliest party date, in days from today
+const PARTY = {
+  70: { 10: 2199, 15: 3099, 20: 3999, 25: 4899, 30: 5799 },
+  71: { 10: 2899, 15: 3999, 20: 5099, 25: 6199, 30: 7299 },
+  72: { 10: 3599, 15: 4999, 20: 6399, 25: 7799, 30: 9199 },
+  73: { 10: 4599, 15: 6299, 20: 7999, 25: 9699, 30: 11399 }
+};
+const partyPrice = (id, p) => PARTY[id][p.kids] + (p.treats ? PARTY_TREATS * p.kids : 0);
+const minPartyDate = () => { const d = new Date(Date.now() + PARTY_MIN_DAYS * 86400000); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+const OPTION_IDS = [...Object.keys(OPTION_SETS), ...Object.keys(PARTY)].map(Number);
 
 // Delivery choices. fee: a number (0 = free, 99 = R99) is added to the total; null = "quoted after you order".
 const DELIVERY = [
@@ -390,6 +408,10 @@ const PRODUCTS = [
   [58,"Christmas Painting Set and Mini Canvases","Christmas Collection",129,"6 Figurines, 6 Mini Canvases, 6 Brushes, 18 Paint pots","ChristmasPack.jpeg"],
   [59,"Christmas Painting Set","Christmas Collection",99,"7 Figurines, 2 Brushes, 6 Paint pots","ChristmasBox.jpeg"],
   [60,"Large Christmas Painting Set","Christmas Collection",189,"8 Figurines, 2 Brushes, 6 Paint pots","ChristmasGift.jpeg"],
+  [70,"Little Celebration","Creative Party Packages",2199,"Per child: 1 Themed Figurine, 6 paint pots, 1 brush, Activity card, Personalised party box, Plate, cup, serviette & straw.\nDecor included: 1 Coordinating tablecloth.","PartyPackage.jpeg"],
+  [71,"Signature Artist Party","Creative Party Packages",2899,"Per child: 2 Themed Figurines, 6 Paint pots, 2 Brushes, Mini paint palette, Activity card, Personalised Party box, Plate, Cup, Serviette & Straw.\nDecor included: 2 Coordinating tablecloths, Personalised A4 Welcome sign, 2 Themed centrepieces, Personalised cake topper.","PartyPackage.jpeg"],
+  [72,"Deluxe Little Artist Party","Creative Party Packages",3599,"Per child: 3 Themed Figurines, 6 Paint pots, 2 Brushes, Mini paint palette, Activity card, Personalised Party box, Plate, Cup, Serviette & Straw, Themed cupcake topper, Coordinating Balloon.\nDecor included: 2 Coordinating tablecloths, Personalised A3 Welcome sign, 2 Themed centrepieces, Personalised cake topper, 2m Themed Bunting, Food label picks.","PartyPackage.jpeg"],
+  [73,"Little Artist Dream Party","Creative Party Packages",4599,"Per child: 1 Large/Premium Themed Figurine, 6 Paint pots, 2 Brushes, Mini paint palette, Activity card, Personalised Party box, Plate, Cup, Serviette & Straw, Themed cupcake topper, Coordinating Balloon, Personalised A6 invitation, Additional special little gift.\nDecor included: 2 Coordinating tablecloths, Personalised A3 Welcome sign, 2 Themed centrepieces, Personalised cake topper, 2m Themed Bunting, Food label picks, Themed Backdrop, Additional coordinating details.","PartyPackage.jpeg"],
   [61,"Paint Brush","Extras",6,"1 Paint brush","ExtraBrush.jpeg"],
   [62,"Paint pots (each)","Extras",10,"1 Extra paint pot.","ExtraPaint.jpeg"],
   [63,"Gem Stickers","Extras",5,"1 Sheet of Gem stickers","ExtraGems.jpeg"],
@@ -409,6 +431,7 @@ const CATS = {
   "Sip & Paint Boxes": ["\u{1F377}", "Relax, sip and create."],
   "Wall Hanging":      ["\u{1F5BC}\uFE0F", "Show off their artwork."],
   "Crafting Kit":      ["\u2702\uFE0F",    "Everything in one box."]
+  "Creative Party Packages": ["\u{1F389}", "Everything for a colourful celebration."],
 };
 
 /* ============================================================
@@ -454,7 +477,7 @@ function card(p) {
       <p class="cat">${p.category}</p>
       <h3>${p.name}</h3>
       <p class="desc">${p.description}</p>
-      <div class="buy"><span class="price">${money(p.price)}</span><button class="add" data-id="${p.id}">   ${typeof p.price !== "number" ? "Enquire" : OPTION_IDS.includes(p.id) ? "Options" : "Add to cart"}
+      <div class="buy"><span class="price">${PARTY[p.id] ? "From " : ""}${money(p.price)}</span><button class="add" data-id="${p.id}">
     </div></article>`;
 }
 
@@ -488,11 +511,11 @@ function renderShop() {
   });
 }
 
-function addToCart(id, opt = "") {
+function addToCart(id, opt = "", party = null) {
   const prod = PRODUCTS.find(p => p.id === id);
   if (prod && typeof prod.price !== "number") { window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi, I would like a quote for: " + prod.name)}`, "_blank"); return; }
   const found = cart.find(i => i.id === id && (i.opt || "") === opt);
-  if (found) found.qty++; else cart.push({ id, opt, qty: 1 });
+  if (found) found.qty++; else cart.push({ id, opt, qty: 1, party });
   renderCart();
   $("panel").classList.add("open");
 }
@@ -505,7 +528,12 @@ function changeQty(idx, delta) {
 }
 
 function cartLines() {
-  return cart.map((i, idx) => ({ ...PRODUCTS.find(p => p.id === i.id), qty: i.qty, opt: i.opt || "", idx })).filter(l => l.name);
+  return cart.map((i, idx) => {
+    const prod = PRODUCTS.find(p => p.id === i.id);
+    if (!prod) return null;
+    const price = i.party && PARTY[i.id] ? partyPrice(i.id, i.party) : prod.price;
+    return { ...prod, price, qty: i.qty, opt: i.opt || "", idx, party: i.party || null };
+  }).filter(Boolean);
 }
 
 function renderCart() {
@@ -546,16 +574,18 @@ function checkoutError() {
 function cartTotals() {
   const lines = cartLines();
   const d = currentDelivery();
+  const hasParty = lines.some(l => l.party);
   const subtotal = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
-  let fee = 0, feeText, known = true;
-  if (d.fee === "live") {
+  let fee = 0, feeText, known = true, separate = false;
+  if (d.fee === "live" && hasParty) { separate = true; feeText = "Billed separately after your order"; }
+  else if (d.fee === "live") {
     if (validQuote()) { fee = quote.price; feeText = money(fee); }
     else { known = false; feeText = "Tap Get delivery price"; }
   } else if (d.fee === null) { known = false; feeText = "Quoted after you order"; }
   else { fee = d.fee; feeText = fee === 0 ? "Free" : money(fee); }
   const total = Math.round((subtotal + (lines.length ? fee : 0)) * 100) / 100;
-  const plus = !known && lines.length ? " + delivery" : "";
-  return { lines, d, subtotal, fee, feeText, known, total, plus };
+  const plus = (separate || !known) && lines.length ? " + delivery" : "";
+  return { lines, d, subtotal, fee, feeText, known, separate, hasParty, total, plus };
 }
 
 function orderText(paymentText, ref) {
@@ -573,10 +603,10 @@ function orderText(paymentText, ref) {
 }
 
 function updateCheckout() {
-  const { lines, d, feeText, known, total, plus } = cartTotals();
+  const { lines, d, feeText, known, hasParty, total, plus } = cartTotals();
   const pay = PAYMENTS[Number($("payment").value)] || PAYMENTS[0];
   $("addr-only").hidden = !d.address;
-  $("get-rate").hidden = !(CHECKOUT_URL && d.fee === "live" && lines.length);
+  $("get-rate").hidden = !(CHECKOUT_URL && d.fee === "live" && lines.length && !hasParty);
   $("pay-note").textContent = pay.note;
   $("ship").textContent = lines.length ? feeText : "-";
   $("total").textContent = money(total) + plus;
@@ -615,7 +645,7 @@ async function payWithYoco() {
   const err = checkoutError();
   $("form-err").hidden = !err; $("form-err").textContent = err;
   if (err) return;
-  if (currentDelivery().fee === "live" && !validQuote()) {
+  if (currentDelivery().fee === "live" && !cartTotals().hasParty && !validQuote()) {
     $("form-err").hidden = false; $("form-err").textContent = "Please tap Get delivery price first.";
     return;
   }
@@ -626,7 +656,7 @@ async function payWithYoco() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        items: cartLines().map(l => ({ id: l.id, qty: l.qty })),
+        items: cartLines().map(l => ({ id: l.id, qty: l.qty, party: l.party || undefined })),
         delivery: currentDelivery().id,
         address: addressObj(),
         expectedTotal: cartTotals().total,
@@ -680,7 +710,19 @@ function openDetail(id) {
   const p = PRODUCTS.find(x => x.id === id);
   if (!p) return;
   const on = wish.includes(id);
-  const needsOpt = OPTION_IDS.includes(id);
+  const isParty = !!PARTY[id];
+  const needsOpt = !isParty && OPTION_IDS.includes(id);
+  let extra = "";
+  if (isParty) {
+    extra = `<div class="party-fields">
+      <label class="opt">Number of children<select id="pt-kids"><option value="">Select...</option>${PARTY_SIZES.map(n => `<option value="${n}">${n} kids - ${money(PARTY[id][n])}</option>`).join("")}</select></label>
+      <label class="opt">Party treats add-on (${money(PARTY_TREATS)} per child)<select id="pt-treats"><option value="no">No, thank you</option><option value="yes">Yes, add party treats</option></select></label>
+      <label class="opt">Party theme<input id="pt-theme" maxlength="80" placeholder="e.g. Unicorns, Dinosaurs, Space..."></label>
+      <label class="opt">Party date<input id="pt-date" type="date" min="${minPartyDate()}"></label>
+      <p class="opt-err" id="opt-err" hidden></p></div>`;
+  } else if (needsOpt) {
+    extra = `<label class="opt">Choose your ${OPTION_SETS[id].label}<select id="detail-opt"><option value="">Select...</option>${OPTION_SETS[id].list.map(t => `<option>${t}</option>`).join("")}</select></label><p class="opt-err" id="opt-err" hidden>Please choose an option first.</p>`;
+  }
   $("detail-body").innerHTML = `
     <div class="pic">${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span>${p.name}</span>`}${p.badge ? `<em class="badge">${p.badge}</em>` : ""}
       <button class="heart" id="detail-heart" data-id="${id}" aria-pressed="${on}" aria-label="Save ${p.name} to wishlist">${on ? "\u2665" : "\u2661"}</button></div>
@@ -688,10 +730,31 @@ function openDetail(id) {
       <p class="cat">${p.category}</p>
       <h2 id="detail-title">${p.name}</h2>
       <p class="full">${p.description}</p>
-            ${needsOpt ? `<label class="opt">Choose your ${OPTION_SETS[id].label}<select id="detail-opt"><option value="">Select...</option>${OPTION_SETS[id].list.map(t => `<option>${t}</option>`).join("")}</select></label><p class="opt-err" id="opt-err" hidden>Please choose an option first.</p>` : ""}
-      <div class="buy"><span class="price">${money(p.price)}</span><button class="add" id="detail-add">Add to cart</button></div>
+      ${extra}
+      <div class="buy"><span class="price" id="detail-price">${isParty ? "From " : ""}${money(p.price)}</span><button class="add" id="detail-add">Add to cart</button></div>
     </div>`;
+  if (isParty) {
+    const refresh = () => {
+      const kids = Number($("pt-kids").value);
+      $("detail-price").textContent = PARTY_SIZES.includes(kids) ? money(partyPrice(id, { kids, treats: $("pt-treats").value === "yes" })) : "From " + money(p.price);
+    };
+    $("pt-kids").addEventListener("change", refresh);
+    $("pt-treats").addEventListener("change", refresh);
+  }
   $("detail-add").onclick = () => {
+    if (isParty) {
+      const kids = Number($("pt-kids").value), treats = $("pt-treats").value === "yes";
+      const theme = $("pt-theme").value.replace(/[<>&"]/g, " ").replace(/\s+/g, " ").trim().slice(0, 80);
+      const date = $("pt-date").value, err = $("opt-err");
+      const problem = !PARTY_SIZES.includes(kids) ? "Please choose the number of children."
+        : !theme ? "Please tell us the party theme."
+        : !date ? "Please choose the party date."
+        : date < minPartyDate() ? "The party date must be at least " + PARTY_MIN_DAYS + " days from today." : "";
+      if (problem) { err.textContent = problem; err.hidden = false; return; }
+      $("detail").close();
+      addToCart(id, `${kids} kids${treats ? " + party treats" : ""} | Theme: ${theme} | Party date: ${date}`, { kids, treats, theme, date });
+      return;
+    }
     let opt = "";
     if (needsOpt) { opt = $("detail-opt").value; if (!opt) { $("opt-err").hidden = false; return; } }
     $("detail").close();
