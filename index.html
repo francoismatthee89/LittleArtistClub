@@ -161,6 +161,11 @@ body:has(dialog[open]) { overflow: hidden; }
 .opt input { padding: .65rem .9rem; border: 2px solid #EDB9C2; border-radius: 12px; background: #fff; font: 400 1rem var(--body); color: var(--ink); }
 .party-fields { display: grid; gap: .6rem; }  
 
+/* Terms checkbox + footer links */
+.agree { display: flex; gap: .5rem; align-items: flex-start; margin: 0 0 .75rem; font-size: .8rem; font-weight: 500; line-height: 1.4; }
+.agree input { margin-top: .15rem; accent-color: var(--sage); flex: none; }
+footer a { color: #fff; }  
+
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
   .brand b { font-size: 1.15rem; }
@@ -264,7 +269,7 @@ body:has(dialog[open]) { overflow: hidden; }
   </div>
 </section>
 
-<footer><div class="wrap">&copy; 2026 Little Artists Club</div></footer>
+<footer><div class="wrap">&copy; 2026 Little Artist Club &middot; <a href="terms.html">Terms &amp; Conditions</a> &middot; <a href="returns.html">Returns &amp; Refunds</a></div></footer>
 
 <dialog class="dlg" id="detail" aria-labelledby="detail-title">
   <button class="close dlg-x" id="detail-close" aria-label="Close">&times;</button>
@@ -295,10 +300,11 @@ body:has(dialog[open]) { overflow: hidden; }
       <button class="btn pay" id="get-rate" type="button" hidden>Get delivery price</button>
       <label>Payment <select id="payment"></select></label>
       <p class="note" id="pay-note"></p>
-      <p class="note">Please allow 3-4 working days to prepare your order. Personalised orders may take a little longer. Courier delivery time is extra.</p>
+      <p class="note">Please allow 5 working days to prepare your order. Personalised orders may take a little longer. Courier delivery time is extra.</p>
     </div>
     <div class="ship-row"><span>Delivery</span><span id="ship">-</span></div>
     <div class="total"><span>Total</span><span id="total">R0</span></div>
+      <label class="agree"><input type="checkbox" id="agree"> I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a> and the <a href="returns.html" target="_blank" rel="noopener">Returns &amp; Refunds Policy</a>.</label>    
     <p class="opt-err" id="form-err" hidden></p>
     <button class="btn pay" id="pay-yoco" type="button" hidden>Pay now with Yoco</button>
     <a class="btn" id="checkout" href="#">Send order on WhatsApp</a>
@@ -565,6 +571,7 @@ function validQuote() { return !!quote && quote.key === quoteKey(); }
 
 function checkoutError() {
   if (!cartLines().length) return "Your cart is empty.";
+  if (!$("agree").checked) return "Please tick the box to agree to our Terms & Conditions and Returns Policy.";
   if (!$("c-name").value.trim() || !$("c-phone").value.trim()) return "Please enter your name and cell number.";
   const a = addressObj();
   if (currentDelivery().address && (!a.street || !a.suburb || !a.city || !a.province || !a.code)) return "Please complete your delivery address, including the province.";
@@ -599,6 +606,7 @@ function orderText(paymentText, ref) {
     `\nDelivery: ${d.label} (${feeText})` +
     `\nTotal: ${money(total)}${plus}` +
     `\nPayment: ${paymentText}` + (ref ? `\nOrder ref: ${ref}` : "") +
+    `\nTerms & Conditions and Returns Policy: ${$("agree").checked ? "accepted" : "not yet accepted"}` +
     `\n\nName: ${v("c-name")}\nCell: ${v("c-phone")}` + (addr ? `\nAddress: ${addr}` : "");
 }
 
@@ -658,6 +666,7 @@ async function payWithYoco() {
       body: JSON.stringify({
         items: cartLines().map(l => ({ id: l.id, qty: l.qty, party: l.party || undefined })),
         delivery: currentDelivery().id,
+        agreed: $("agree").checked,
         address: addressObj(),
         expectedTotal: cartTotals().total,
         summary: orderText("Paid online with Yoco"),
