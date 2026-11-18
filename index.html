@@ -171,6 +171,12 @@ footer .social { display: flex; justify-content: center; gap: 1.25rem; margin-bo
 footer .social a { display: inline-flex; align-items: center; gap: .4rem; text-decoration: none; }
 footer .social a:hover { text-decoration: underline; }  
 
+/* Themed Box */
+.opt[hidden] { display: none; }
+.opt textarea { padding: .65rem .9rem; border: 2px solid #EDB9C2; border-radius: 12px; background: #fff; font: 400 1rem var(--body); color: var(--ink); resize: vertical; }
+.check { display: flex; gap: .5rem; align-items: center; font-weight: 500; font-size: .9rem; }
+.check input { accent-color: var(--sage); width: 1.1rem; height: 1.1rem; }  
+
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
   .brand b { font-size: 1.15rem; }
@@ -353,8 +359,12 @@ const PARTY = {
 };
 const partyPrice = (id, p) => PARTY[id][p.kids] + (p.treats ? PARTY_TREATS * p.kids : 0);
 const minPartyDate = () => { const d = new Date(Date.now() + PARTY_MIN_DAYS * 86400000); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
-const OPTION_IDS = [...Object.keys(OPTION_SETS), ...Object.keys(PARTY)].map(Number);
-
+  
+// Themed Box: base price and the optional extra personalisation (keep in step with the Worker)
+const THEMED = { 74: { price: 350, extra: 100 } };
+const themedPrice = (id, t) => THEMED[id].price + (t.extra ? THEMED[id].extra : 0);
+const OPTION_IDS = [...Object.keys(OPTION_SETS), ...Object.keys(PARTY), ...Object.keys(THEMED)].map(Number);
+  
 // Delivery choices. fee: a number (0 = free, 99 = R99) is added to the total; null = "quoted after you order".
 const DELIVERY = [
   { id: "courier", label: "The Courier Guy - door-to-door", fee: "live", address: true },
@@ -375,6 +385,7 @@ const PRODUCTS = [
   [1,"Single pack","Eco resin molds",39,"1 Figurine, 3 paint pots, 1 Brush.","SingleMould.jpeg"],
   [2,"Double pack","Eco resin molds",59,"2 Figurines, 4 Paint pots, 1 Brush","DoubleMould.jpeg"],
   [3,"Triple pack","Eco resin molds",79,"3 Figurines, 5 Paint pots, 1 Brush","TripleMould.jpeg"],
+  [74,"Themed Box","Themed Boxes",350,"6-8 Figurines, 12 Paint pots, 2 Brushes, Passport, Certificate, Gems/Wooden piece","ThemeBox.jpeg"],
   [4,"Space Ornament","Wooden collection",49,"2 Wooden pieces, 3 Paint pots, 1 Brush, Gem stickers.","WoodSpace.jpeg"],
   [5,"Unicorn Ornament","Wooden collection",49,"2 Wooden pieces, 3 Paint pots, 1 Brush, Gem stickers.","WoodUnicorn.jpeg"],
   [6,"Ocean Ornament","Wooden collection",49,"2 Wooden pieces, 3 Paint pots, 1 Brush, Gem stickers.","WoodOcean.jpeg"],
@@ -441,6 +452,7 @@ const PRODUCTS = [
 
 // Icon and short line shown for each category
 const CATS = {
+  "Themed Boxes": ["\u{1F381}", "Creative boxes in your favourite themes."],
   "Eco resin molds":   ["\u{1F343}", "Create stunning resin pieces."],
   "Wooden collection": ["\u{1F332}", "Paint, decorate and personalise."],
   "3D Collection":     ["\u{1F9CA}", "Fun 3D figurines to paint."],
@@ -530,11 +542,11 @@ function renderShop() {
   });
 }
 
-function addToCart(id, opt = "", party = null) {
+function addToCart(id, opt = "", party = null, themed = null) {
   const prod = PRODUCTS.find(p => p.id === id);
   if (prod && typeof prod.price !== "number") { window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi, I would like a quote for: " + prod.name)}`, "_blank"); return; }
   const found = cart.find(i => i.id === id && (i.opt || "") === opt);
-  if (found) found.qty++; else cart.push({ id, opt, qty: 1, party });
+  if (found) found.qty++; else cart.push({ id, opt, qty: 1, party, themed });
   renderCart();
   $("panel").classList.add("open");
 }
@@ -550,8 +562,8 @@ function cartLines() {
   return cart.map((i, idx) => {
     const prod = PRODUCTS.find(p => p.id === i.id);
     if (!prod) return null;
-    const price = i.party && PARTY[i.id] ? partyPrice(i.id, i.party) : prod.price;
-    return { ...prod, price, qty: i.qty, opt: i.opt || "", idx, party: i.party || null };
+    const price = i.party && PARTY[i.id] ? partyPrice(i.id, i.party) : i.themed && THEMED[i.id] ? themedPrice(i.id, i.themed) : prod.price;
+    return { ...prod, price, qty: i.qty, opt: i.opt || "", idx, party: i.party || null, themed: i.themed || null };
   }).filter(Boolean);
 }
 
@@ -677,7 +689,7 @@ async function payWithYoco() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        items: cartLines().map(l => ({ id: l.id, qty: l.qty, party: l.party || undefined })),
+      items: cartLines().map(l => ({ id: l.id, qty: l.qty, party: l.party || undefined, themed: l.themed || undefined })),
         delivery: currentDelivery().id,
         agreed: $("agree").checked,
         address: addressObj(),
@@ -733,7 +745,8 @@ function openDetail(id) {
   if (!p) return;
   const on = wish.includes(id);
   const isParty = !!PARTY[id];
-  const needsOpt = !isParty && OPTION_IDS.includes(id);
+  const isThemed = !!THEMED[id];
+  const needsOpt = !isParty && !isThemed && OPTION_IDS.includes(id);
   let extra = "";
   if (isParty) {
     extra = `<div class="party-fields">
@@ -741,6 +754,12 @@ function openDetail(id) {
       <label class="opt">Party treats add-on (${money(PARTY_TREATS)} per child)<select id="pt-treats"><option value="no">No, thank you</option><option value="yes">Yes, add party treats</option></select></label>
       <label class="opt">Party theme<input id="pt-theme" maxlength="80" placeholder="e.g. Unicorns, Dinosaurs, Space..."></label>
       <label class="opt">Party date<input id="pt-date" type="date" min="${minPartyDate()}"></label>
+      <p class="opt-err" id="opt-err" hidden></p></div>`;
+  } else if (isThemed) {
+    extra = `<div class="party-fields">
+      <label class="opt">Choose your theme<select id="tb-theme"><option value="">Select...</option>${THEMES.map(t => `<option>${t}</option>`).join("")}</select></label>
+      <label class="check"><input type="checkbox" id="tb-extra"> Extra personalisation (+${money(THEMED[id].extra)})</label>
+      <label class="opt" id="tb-notes-wrap" hidden>Personalisation details<textarea id="tb-notes" rows="3" maxlength="300" placeholder="e.g. child's name, age, colours, special wording..."></textarea></label>
       <p class="opt-err" id="opt-err" hidden></p></div>`;
   } else if (needsOpt) {
     extra = `<label class="opt">Choose your ${OPTION_SETS[id].label}<select id="detail-opt"><option value="">Select...</option>${OPTION_SETS[id].list.map(t => `<option>${t}</option>`).join("")}</select></label><p class="opt-err" id="opt-err" hidden>Please choose an option first.</p>`;
@@ -763,6 +782,13 @@ function openDetail(id) {
     $("pt-kids").addEventListener("change", refresh);
     $("pt-treats").addEventListener("change", refresh);
   }
+  if (isThemed) {
+    $("tb-extra").addEventListener("change", () => {
+      const on2 = $("tb-extra").checked;
+      $("tb-notes-wrap").hidden = !on2;
+      $("detail-price").textContent = money(themedPrice(id, { extra: on2 }));
+    });
+  }
   $("detail-add").onclick = () => {
     if (isParty) {
       const kids = Number($("pt-kids").value), treats = $("pt-treats").value === "yes";
@@ -775,6 +801,15 @@ function openDetail(id) {
       if (problem) { err.textContent = problem; err.hidden = false; return; }
       $("detail").close();
       addToCart(id, `${kids} kids${treats ? " + party treats" : ""} | Theme: ${theme} | Party date: ${date}`, { kids, treats, theme, date });
+      return;
+    }
+    if (isThemed) {
+      const theme = $("tb-theme").value, extraOn = $("tb-extra").checked, err = $("opt-err");
+      const notes = $("tb-notes").value.replace(/&/g, " and ").replace(/[<>"]/g, " ").replace(/\s+/g, " ").trim().slice(0, 300);
+      const problem = !theme ? "Please choose a theme." : (extraOn && notes.length < 3) ? "Please add your personalisation details." : "";
+      if (problem) { err.textContent = problem; err.hidden = false; return; }
+      $("detail").close();
+      addToCart(id, `Theme: ${theme}${extraOn ? " | Extra personalisation: " + notes : ""}`, null, { theme, extra: extraOn, notes: extraOn ? notes : "" });
       return;
     }
     let opt = "";
