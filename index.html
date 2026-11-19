@@ -177,6 +177,15 @@ footer .social a:hover { text-decoration: underline; }
 .check { display: flex; gap: .5rem; align-items: center; font-weight: 500; font-size: .9rem; }
 .check input { accent-color: var(--sage); width: 1.1rem; height: 1.1rem; }  
 
+/* Trending window */
+.trending { background: var(--blush); border: 2px solid #EDB9C2; border-radius: 24px; padding: 1rem 1.25rem 1.5rem; margin: 1.5rem 0 2rem; overflow: hidden; }
+.ticker { overflow: hidden; background: var(--sage); color: #fff; border-radius: 999px; padding: .45rem 0; font-weight: 500; font-size: .85rem; letter-spacing: .04em; }
+.ticker-track { display: flex; width: max-content; animation: ticker 40s linear infinite; }
+.tg { display: flex; }
+.tg span { white-space: nowrap; padding-right: 2.5rem; }
+@keyframes ticker { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }  
+
 /* Phones: list-style cards like mockup 3 */
 @media (max-width: 600px) {
   .brand b { font-size: 1.15rem; }
@@ -520,6 +529,21 @@ function section(c, items, preview) {
     <div class="grid">${(preview ? items.slice(0, 4) : items).map(card).join("")}</div></section>`;
 }
 
+// Products shown in the "Trending now" window (product ids from the list above)
+const TRENDING_IDS = [44, 74, 1, 60];
+
+function trendingSection() {
+  const items = TRENDING_IDS.map(id => PRODUCTS.find(p => p.id === id)).filter(Boolean);
+  if (!items.length) return "";
+  const msg = "\u{1F525} Trending now \u2022 Little Artist favourites \u2022 Best sellers \u2022 Order yours today! \u{1F525}";
+  const group = `<div class="tg">${`<span>${msg}</span>`.repeat(3)}</div>`;
+  return `<section class="trending">
+    <div class="ticker" aria-hidden="true"><div class="ticker-track">${group}${group}</div></div>
+    <div class="sec-head"><span class="ico">\u{1F525}</span>
+      <div><h2>Trending now</h2><span class="sub">Our top ${items.length} favourites with little artists.</span></div></div>
+    <div class="grid">${items.map(p => card({ ...p, badge: p.badge || "Best Seller" })).join("")}</div></section>`;
+}
+  
 function renderShop() {
   const q = $("search").value.trim().toLowerCase();
   let html;
@@ -530,7 +554,7 @@ function renderShop() {
     const saved = PRODUCTS.filter(p => wish.includes(p.id));
     html = saved.length ? section("Saved", saved, false) : `<p class="empty" style="margin-top:1.5rem">Nothing saved yet. Tap the heart on a product to save it here.</p>`;
   } else if (activeCategory === "All") {
-    html = cats.map(c => section(c, PRODUCTS.filter(p => p.category === c), true)).join("");
+       html = trendingSection() + cats.map(c => section(c, PRODUCTS.filter(p => p.category === c), true)).join("");
   } else {
     html = section(activeCategory, PRODUCTS.filter(p => p.category === activeCategory), false);
   }
